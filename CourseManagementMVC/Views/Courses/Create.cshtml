@@ -1,0 +1,95 @@
+@model CourseManagementMVC.Models.CourseViewModel
+@{
+    ViewData["Title"] = "Thêm khóa học mới";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card-premium p-5">
+            <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3 border-secondary" style="border-color: rgba(255, 255, 255, 0.08) !important;">
+                <h2 class="text-white font-weight-bold mb-0">Tạo khóa học mới</h2>
+                <a asp-action="Index" class="btn btn-dark-glass btn-sm">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Trở về
+                </a>
+            </div>
+
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
+
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label asp-for="Title" class="form-label form-label-custom"></label>
+                        <input asp-for="Title" class="form-control form-glass" placeholder="Nhập tiêu đề khóa học..." required />
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label asp-for="Description" class="form-label form-label-custom"></label>
+                        <textarea asp-for="Description" class="form-control form-glass" rows="6" placeholder="Mô tả nội dung chi tiết khóa học..." required></textarea>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Price" class="form-label form-label-custom"></label>
+                        <div class="input-group">
+                            <input asp-for="Price" type="number" class="form-control form-glass" placeholder="Ví dụ: 500000..." required />
+                            <span class="input-group-text bg-transparent border-secondary text-secondary" style="border-radius: 0 12px 12px 0; border-color: rgba(255, 255, 255, 0.08) !important;">VND</span>
+                        </div>
+                        <span asp-validation-for="Price" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="DurationHours" class="form-label form-label-custom"></label>
+                        <div class="input-group">
+                            <input asp-for="DurationHours" type="number" class="form-control form-glass" placeholder="Ví dụ: 40..." required />
+                            <span class="input-group-text bg-transparent border-secondary text-secondary" style="border-radius: 0 12px 12px 0; border-color: rgba(255, 255, 255, 0.08) !important;">Giờ</span>
+                        </div>
+                        <span asp-validation-for="DurationHours" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="LearningMode" class="form-label form-label-custom"></label>
+                        <select asp-for="LearningMode" class="form-select form-glass text-white" style="background-color: var(--bg-dark);">
+                            <option value="Online">Online</option>
+                            <option value="Offline">Offline</option>
+                            <option value="Hybrid">Hybrid</option>
+                        </select>
+                        <span asp-validation-for="LearningMode" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Level" class="form-label form-label-custom"></label>
+                        <select asp-for="Level" class="form-select form-glass text-white" style="background-color: var(--bg-dark);">
+                            <option value="Beginner">Beginner (Cơ bản)</option>
+                            <option value="Intermediate">Intermediate (Trung cấp)</option>
+                            <option value="Advanced">Advanced (Nâng cao)</option>
+                        </select>
+                        <span asp-validation-for="Level" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label asp-for="ThumbnailUrl" class="form-label form-label-custom"></label>
+                        <input asp-for="ThumbnailUrl" class="form-control form-glass" placeholder="Đường dẫn URL ảnh thumbnail..." />
+                        <span asp-validation-for="ThumbnailUrl" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6 d-none">
+                        <input type="hidden" asp-for="Status" value="Active" />
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 d-flex gap-3 justify-content-end">
+                    <a asp-action="Index" class="btn btn-dark-glass px-4 py-2">Hủy bỏ</a>
+                    <button type="submit" class="btn btn-premium px-4 py-2">
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Lưu lại
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

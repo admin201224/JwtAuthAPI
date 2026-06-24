@@ -1,0 +1,95 @@
+@model CourseManagementMVC.Models.RegisterViewModel
+@{
+    ViewData["Title"] = "Đăng ký tài khoản";
+}
+
+<div class="row justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="col-md-5">
+        <div class="card-premium p-5">
+            <div class="text-center mb-4">
+                <i class="fa-solid fa-user-plus fa-3x mb-3 text-purple" style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                <h2 class="font-weight-extrabold text-white">Tạo tài khoản mới</h2>
+                <p class="text-secondary">Tham gia cùng hàng ngàn học viên khác</p>
+            </div>
+
+            <form asp-action="Register" method="post">
+                @Html.AntiForgeryToken()
+                
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Username" class="form-label form-label-custom"></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0 border-secondary text-secondary" style="border-radius: 12px 0 0 12px; border-color: rgba(255, 255, 255, 0.08) !important;">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        <input asp-for="Username" class="form-control form-glass border-start-0" style="border-radius: 0 12px 12px 0 !important;" placeholder="Tên đăng nhập..." required />
+                    </div>
+                    <span asp-validation-for="Username" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label form-label-custom"></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0 border-secondary text-secondary" style="border-radius: 12px 0 0 12px; border-color: rgba(255, 255, 255, 0.08) !important;">
+                            <i class="fa-solid fa-envelope"></i>
+                        </span>
+                        <input asp-for="Email" type="email" class="form-control form-glass border-start-0" style="border-radius: 0 12px 12px 0 !important;" placeholder="Địa chỉ email..." required />
+                    </div>
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Role" class="form-label form-label-custom"></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0 border-secondary text-secondary" style="border-radius: 12px 0 0 12px; border-color: rgba(255, 255, 255, 0.08) !important;">
+                            <i class="fa-solid fa-user-shield"></i>
+                        </span>
+                        <select asp-for="Role" class="form-select form-glass border-start-0 text-white" style="border-radius: 0 12px 12px 0 !important; background-color: var(--bg-dark);">
+                            <option value="Student" class="text-dark">Học viên (Student)</option>
+                            <option value="Instructor" class="text-dark">Giảng viên (Instructor)</option>
+                        </select>
+                    </div>
+                    <span asp-validation-for="Role" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label form-label-custom"></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0 border-secondary text-secondary" style="border-radius: 12px 0 0 12px; border-color: rgba(255, 255, 255, 0.08) !important;">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input asp-for="Password" class="form-control form-glass border-start-0" style="border-radius: 0 12px 12px 0 !important;" placeholder="Mật khẩu ít nhất 6 ký tự..." required />
+                    </div>
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="ConfirmPassword" class="form-label form-label-custom"></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0 border-secondary text-secondary" style="border-radius: 12px 0 0 12px; border-color: rgba(255, 255, 255, 0.08) !important;">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input asp-for="ConfirmPassword" class="form-control form-glass border-start-0" style="border-radius: 0 12px 12px 0 !important;" placeholder="Nhập lại mật khẩu..." required />
+                    </div>
+                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                </div>
+
+                <button type="submit" class="btn btn-premium w-100 py-3">
+                    Đăng ký tài khoản <i class="fa-solid fa-user-plus ms-1"></i>
+                </button>
+            </form>
+
+            <div class="text-center mt-4">
+                <p class="text-secondary small mb-0">
+                    Đã có tài khoản? 
+                    <a asp-action="Login" class="text-white font-weight-bold" style="text-decoration: none;">Đăng nhập ngay</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

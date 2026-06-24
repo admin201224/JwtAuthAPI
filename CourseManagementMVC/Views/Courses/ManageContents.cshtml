@@ -1,0 +1,95 @@
+@model IEnumerable<CourseManagementMVC.Models.CourseContentViewModel>
+@{
+    var course = ViewBag.Course as CourseManagementMVC.Models.CourseViewModel;
+    ViewData["Title"] = $"Quản lý bài học - {course?.Title}";
+}
+
+<div class="card-premium p-5">
+    <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3 border-secondary" style="border-color: rgba(255, 255, 255, 0.08) !important;">
+        <div>
+            <h2 class="text-white font-weight-bold mb-1">Quản lý bài học</h2>
+            <p class="text-secondary mb-0">Khóa học: <strong class="text-white">@course?.Title</strong></p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Details" asp-route-id="@course?.Id" class="btn btn-dark-glass btn-sm">
+                <i class="fa-solid fa-eye me-1"></i> Xem trang chi tiết
+            </a>
+            <a asp-action="CreateContent" asp-route-courseId="@course?.Id" class="btn btn-premium btn-sm">
+                <i class="fa-solid fa-plus me-1"></i> Thêm bài học mới
+            </a>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="fa-solid fa-folder-open fa-3x text-secondary mb-3"></i>
+            <h4 class="text-white">Chưa có bài học nào</h4>
+            <p class="text-secondary mb-4">Khóa học này hiện chưa có bài học nào. Hãy thêm bài học đầu tiên!</p>
+            <a asp-action="CreateContent" asp-route-courseId="@course?.Id" class="btn btn-premium btn-sm">
+                Thêm bài học đầu tiên
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle border-secondary" style="background: transparent;">
+                <thead>
+                    <tr class="text-secondary small text-uppercase" style="border-bottom-color: rgba(255, 255, 255, 0.08) !important;">
+                        <th style="width: 80px;">Thứ tự</th>
+                        <th>Tiêu đề bài giảng</th>
+                        <th style="width: 150px;">Loại nội dung</th>
+                        <th style="width: 120px;">Học thử?</th>
+                        <th style="width: 150px;" class="text-end">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr style="border-bottom-color: rgba(255, 255, 255, 0.05) !important;">
+                            <td class="font-weight-bold text-center">@item.OrderIndex</td>
+                            <td class="text-white font-weight-semibold">@item.Title</td>
+                            <td>
+                                @{
+                                    var iconClass = item.ContentType switch
+                                    {
+                                        "Video" => "fa-circle-play text-purple",
+                                        "Quiz" => "fa-circle-question text-info",
+                                        _ => "fa-file-invoice text-pink"
+                                    };
+                                }
+                                <i class="fa-solid @iconClass me-1"></i> @item.ContentType
+                            </td>
+                            <td>
+                                @if (item.IsPreview)
+                                {
+                                    <span class="badge bg-success small">Có</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary small">Không</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a asp-action="EditContent" asp-route-courseId="@item.CourseId" asp-route-contentId="@item.Id" class="btn btn-sm btn-dark-glass">
+                                        <i class="fa-solid fa-edit"></i>
+                                    </a>
+                                    <form asp-action="DeleteContent" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bài học này?');">
+                                        <input type="hidden" name="courseId" value="@item.CourseId" />
+                                        <input type="hidden" name="contentId" value="@item.Id" />
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger text-white">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

@@ -1,0 +1,30 @@
+$kind: http-request
+name: Login
+method: POST
+url: 'http://localhost:5138/api/authorize/login'
+order: 2000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "username": "linh",
+      "password": "123456"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+
+      if (json.accessToken) {
+          pm.collectionVariables.set("accessToken", json.accessToken);
+          console.log("Access Token saved:", json.accessToken);
+      }
+
+      if (json.refreshToken) {
+          pm.collectionVariables.set("refreshToken", json.refreshToken);
+          console.log("Refresh Token saved:", json.refreshToken);
+      }

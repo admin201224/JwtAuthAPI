@@ -1,0 +1,135 @@
+@model IEnumerable<CourseManagementMVC.Models.CourseViewModel>
+@{
+    ViewData["Title"] = "Danh sách khóa học";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-5">
+    <div>
+        <h1 class="font-weight-extrabold text-white mb-1">Khám phá các khóa học</h1>
+        <p class="text-secondary mb-0">Nâng cao kỹ năng của bạn với các chương trình học tập chất lượng cao</p>
+    </div>
+    @if (User.Identity?.IsAuthenticated == true && (User.IsInRole("Admin") || User.IsInRole("Instructor")))
+    {
+        <a asp-action="Create" class="btn btn-premium">
+            <i class="fa-solid fa-plus me-1"></i> Thêm khóa học mới
+        </a>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card-premium p-5 text-center">
+        <i class="fa-solid fa-box-open fa-3x text-secondary mb-3"></i>
+        <h3 class="text-white">Chưa có khóa học nào</h3>
+        <p class="text-secondary mb-0">Các khóa học mới sẽ sớm được cập nhật. Vui lòng quay lại sau!</p>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var course in Model)
+        {
+            <div class="col-md-4 col-sm-6">
+                <div class="card-premium h-100 d-flex flex-column">
+                    <!-- Thumbnail with fallback -->
+                    <div class="position-relative">
+                        @if (!string.IsNullOrEmpty(course.ThumbnailUrl))
+                        {
+                            <img src="@course.ThumbnailUrl" class="card-premium-img w-100" alt="@course.Title" onerror="this.src='https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&auto=format&fit=crop&q=60';" />
+                        }
+                        else
+                        {
+                            <div class="w-100 d-flex align-items-center justify-content-center card-premium-img text-white" style="background: var(--primary-gradient);">
+                                <i class="fa-solid fa-graduation-cap fa-3x"></i>
+                            </div>
+                        }
+                        <div class="position-absolute top-0 end-0 m-3 d-flex flex-column gap-2">
+                            @{
+                                var modeClass = course.LearningMode.ToLower() switch
+                                {
+                                    "online" => "badge-online",
+                                    "offline" => "badge-offline",
+                                    _ => "badge-hybrid"
+                                };
+                            }
+                            <span class="badge-custom @modeClass">
+                                <i class="fa-solid fa-desktop"></i> @course.LearningMode
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="p-4 d-flex flex-column flex-grow-1">
+                        <span class="text-purple small font-weight-bold mb-2 text-uppercase" style="letter-spacing: 1px; color: #a855f7;">
+                            <i class="fa-solid fa-layer-group me-1"></i> @course.Level
+                        </span>
+                        
+                        <h4 class="card-title text-white font-weight-bold mb-3">
+                            <a asp-action="Details" asp-route-id="@course.Id" class="text-white text-decoration-none hover-purple">
+                                @course.Title
+                            </a>
+                        </h4>
+                        
+                        <p class="text-secondary small flex-grow-1 line-clamp-3 mb-4">
+                            @(course.Description.Length > 120 ? course.Description.Substring(0, 117) + "..." : course.Description)
+                        </p>
+
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top border-secondary" style="border-color: rgba(255, 255, 255, 0.08) !important;">
+                            <div>
+                                <span class="d-block text-secondary small">Học phí</span>
+                                <span class="text-white font-weight-bold">
+                                    @(course.Price == 0 ? "Miễn phí" : string.Format("{0:N0} đ", course.Price))
+                                </span>
+                            </div>
+                            <div class="text-end">
+                                <span class="d-block text-secondary small">Thời lượng</span>
+                                <span class="text-white small">
+                                    <i class="fa-regular fa-clock me-1"></i> @course.DurationHours giờ
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Footer (Admins & Instructors only) -->
+                    @if (User.Identity?.IsAuthenticated == true && (User.IsInRole("Admin") || User.IsInRole("Instructor")))
+                    {
+                        <div class="px-4 pb-4 d-flex gap-2">
+                            <a asp-action="Edit" asp-route-id="@course.Id" class="btn btn-sm btn-dark-glass flex-grow-1">
+                                <i class="fa-solid fa-edit me-1"></i> Sửa
+                            </a>
+                            <a asp-action="ManageContents" asp-route-id="@course.Id" class="btn btn-sm btn-dark-glass flex-grow-1">
+                                <i class="fa-solid fa-list-check me-1"></i> Bài học
+                            </a>
+                            <form asp-action="Delete" asp-route-id="@course.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa khóa học này? Hành động này không thể hoàn tác.');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-danger text-white">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="px-4 pb-4">
+                            <a asp-action="Details" asp-route-id="@course.Id" class="btn btn-premium w-100">
+                                Xem chi tiết <i class="fa-solid fa-arrow-right ms-1 small"></i>
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<style>
+    .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;  
+        overflow: hidden;
+    }
+    .hover-purple:hover {
+        color: #a855f7 !important;
+    }
+</style>

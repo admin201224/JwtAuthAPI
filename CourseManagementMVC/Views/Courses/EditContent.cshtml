@@ -1,0 +1,106 @@
+@model CourseManagementMVC.Models.CourseContentViewModel
+@{
+    var course = ViewBag.Course as CourseManagementMVC.Models.CourseViewModel;
+    ViewData["Title"] = $"Chỉnh sửa bài học - {course?.Title}";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card-premium p-5">
+            <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3 border-secondary" style="border-color: rgba(255, 255, 255, 0.08) !important;">
+                <div>
+                    <h2 class="text-white font-weight-bold mb-0">Chỉnh sửa bài học</h2>
+                    <p class="text-secondary mb-0">Khóa học: <strong class="text-white">@course?.Title</strong></p>
+                </div>
+                <a asp-action="ManageContents" asp-route-id="@Model.CourseId" class="btn btn-dark-glass btn-sm">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Quay lại
+                </a>
+            </div>
+
+            <form asp-action="EditContent" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="CourseId" />
+                <input type="hidden" asp-for="CreatedAt" />
+                
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
+
+                <div class="row g-3">
+                    <div class="col-md-9">
+                        <label asp-for="Title" class="form-label form-label-custom"></label>
+                        <input asp-for="Title" class="form-control form-glass" placeholder="Ví dụ: Giới thiệu khóa học..." required />
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label asp-for="OrderIndex" class="form-label form-label-custom"></label>
+                        <input asp-for="OrderIndex" type="number" class="form-control form-glass" required />
+                        <span asp-validation-for="OrderIndex" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="ContentType" class="form-label form-label-custom"></label>
+                        <select asp-for="ContentType" class="form-select form-glass text-white" style="background-color: var(--bg-dark);" id="contentTypeSelect">
+                            <option value="Lecture">Lecture (Bài giảng chữ)</option>
+                            <option value="Video">Video (Bài giảng Video)</option>
+                            <option value="Quiz">Quiz (Trắc nghiệm)</option>
+                            <option value="Document">Document (Tài liệu)</option>
+                        </select>
+                        <span asp-validation-for="ContentType" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6 d-flex align-items-end">
+                        <div class="form-check mb-3">
+                            <input asp-for="IsPreview" type="checkbox" class="form-check-input" id="isPreviewCheck" />
+                            <label class="form-check-label text-white" for="isPreviewCheck">Cho phép học viên xem thử miễn phí?</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12" id="videoUrlGroup">
+                        <label asp-for="VideoUrl" class="form-label form-label-custom"></label>
+                        <input asp-for="VideoUrl" class="form-control form-glass" placeholder="Ví dụ: https://www.youtube.com/watch?v=... (Chỉ cần cho loại Video)" />
+                        <span asp-validation-for="VideoUrl" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label asp-for="Body" class="form-label form-label-custom"></label>
+                        <textarea asp-for="Body" class="form-control form-glass" rows="8" placeholder="Nhập nội dung bài giảng chi tiết (Markdown/HTML hoặc văn bản thường)..."></textarea>
+                        <span asp-validation-for="Body" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 d-flex gap-3 justify-content-end">
+                    <a asp-action="ManageContents" asp-route-id="@Model.CourseId" class="btn btn-dark-glass px-4 py-2">Hủy bỏ</a>
+                    <button type="submit" class="btn btn-premium px-4 py-2">
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        $(document).ready(function() {
+            function toggleVideoField() {
+                var selectedType = $('#contentTypeSelect').val();
+                if (selectedType === 'Video') {
+                    $('#videoUrlGroup').slideDown();
+                } else {
+                    $('#videoUrlGroup').slideUp();
+                }
+            }
+
+            // Run on load
+            toggleVideoField();
+
+            // Run on change
+            $('#contentTypeSelect').on('change', function() {
+                toggleVideoField();
+            });
+        });
+    </script>
+}

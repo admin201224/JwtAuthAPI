@@ -1,0 +1,178 @@
+@model IEnumerable<CourseManagementMVC.Models.CourseContentViewModel>
+@{
+    var course = ViewBag.Course as CourseManagementMVC.Models.CourseViewModel;
+    var enrollment = ViewBag.Enrollment as CourseManagementMVC.Models.EnrollmentViewModel;
+    ViewData["Title"] = $"Học: {course?.Title}";
+}
+
+<!-- Full-width study container (hides standard container limits if needed, but we keep it inside a clean layout) -->
+<div class="card-premium p-0 overflow-hidden mb-4">
+    <div class="row g-0" style="min-height: 70vh;">
+        <!-- Left Sidebar: Course Outline -->
+        <div class="col-md-4 col-lg-3 border-end border-secondary" style="background: rgba(15, 23, 42, 0.4); border-color: rgba(255, 255, 255, 0.08) !important;">
+            <div class="p-4 border-bottom border-secondary d-flex flex-column gap-2" style="border-color: rgba(255, 255, 255, 0.08) !important;">
+                <a asp-action="Index" class="text-secondary small text-decoration-none">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Khóa học của tôi
+                </a>
+                <h4 class="text-white font-weight-bold mb-0 text-truncate" title="@course?.Title">@course?.Title</h4>
+                <div class="d-flex align-items-center justify-content-between mt-2">
+                    <span class="text-secondary small">Trạng thái:</span>
+                    <form asp-action="UpdateStatus" method="post" id="statusForm" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="enrollmentId" value="@enrollment?.Id" />
+                        <input type="hidden" name="redirectUrl" value="@Context.Request.Path" />
+                        <select name="status" class="form-select form-glass form-select-sm py-1 px-2 text-white bg-dark border-0 small" style="font-size: 0.75rem;" onchange="this.form.submit()">
+                            <!option value="NotStarted" @(enrollment?.Status == "NotStarted" ? "selected" : "")>Chưa học</!option>
+                            <!option value="InProgress" @(enrollment?.Status == "InProgress" ? "selected" : "")>Đang học</!option>
+                            <!option value="Completed" @(enrollment?.Status == "Completed" ? "selected" : "")>Đã xong</!option>
+                        </select>
+                    </form>
+                </div>
+            </div>
+
+            <!-- List of Lectures -->
+            <div class="p-3" style="max-height: 60vh; overflow-y: auto;">
+                <span class="d-block text-secondary small font-weight-bold mb-3 px-2 text-uppercase" style="letter-spacing: 0.5px;">Danh sách bài học</span>
+                @if (!Model.Any())
+                {
+                    <p class="text-secondary small px-2">Khóa học chưa có bài giảng nào.</p>
+                }
+                else
+                {
+                    <div class="list-group list-group-flush gap-1">
+                        @foreach (var content in Model)
+                        {
+                            <a href="#" class="list-group-item list-group-item-action content-item-link border-0 text-light py-3 px-3 d-flex align-items-center gap-3 lecture-sidebar-item" 
+                               id="lecture_link_@content.Id"
+                               data-id="@content.Id"
+                               data-title="Bài @content.OrderIndex: @content.Title"
+                               data-type="@content.ContentType"
+                               data-body="@content.Body"
+                               data-video="@content.VideoUrl"
+                               style="border-radius: 10px; background: transparent;">
+                                
+                                <div class="d-flex align-items-center justify-content-center bg-dark rounded-circle" style="width: 28px; height: 28px; background-color: rgba(255, 255, 255, 0.05) !important;">
+                                    @if (content.ContentType == "Video")
+                                    {
+                                        <i class="fa-solid fa-play text-purple small"></i>
+                                    }
+                                    else if (content.ContentType == "Quiz")
+                                    {
+                                        <i class="fa-solid fa-question text-info small"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fa-solid fa-book text-pink small"></i>
+                                    }
+                                </div>
+                                <div class="text-truncate flex-grow-1">
+                                    <span class="d-block text-white small font-weight-semibold text-truncate">@content.Title</span>
+                                    <span class="text-secondary small" style="font-size: 0.7rem;">Bài @content.OrderIndex</span>
+                                </div>
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Right Content Area -->
+        <div class="col-md-8 col-lg-9 p-5 d-flex flex-column" style="background: rgba(15, 23, 42, 0.25);">
+            <div id="lectureDisplayArea" class="d-none">
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary" style="border-color: rgba(255, 255, 255, 0.08) !important;">
+                    <h2 class="text-white font-weight-extrabold mb-0" id="activeLectureTitle">Tiêu đề bài giảng</h2>
+                    <span class="badge-custom badge-online" id="activeLectureType">Loại bài học</span>
+                </div>
+
+                <!-- Video Frame Container -->
+                <div class="ratio ratio-16x9 mb-4 rounded-3 overflow-hidden d-none shadow-lg border border-secondary" id="activeVideoContainer" style="border-color: rgba(255, 255, 255, 0.08) !important;">
+                    <iframe id="activeVideoIframe" src="" title="Bài giảng video" allowfullscreen></iframe>
+                </div>
+
+                <!-- Lecture Text Body Container -->
+                <div class="card bg-transparent border-0 text-light mb-4" style="line-height: 1.8; font-size: 1.05rem;">
+                    <div class="card-body p-0" id="activeLectureBody" style="white-space: pre-line;">
+                        Nội dung bài học chữ sẽ hiển thị ở đây...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fallback Welcome View -->
+            <div id="welcomeArea" class="text-center my-auto py-5">
+                <i class="fa-solid fa-circle-play fa-4x text-purple mb-4" style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                <h3 class="text-white font-weight-bold">Bắt đầu bài giảng của bạn</h3>
+                <p class="text-secondary max-width-500 mx-auto">Chọn một bài học từ danh sách bên trái để bắt đầu theo dõi nội dung học tập.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('.lecture-sidebar-item').on('click', function(e) {
+                e.preventDefault();
+
+                // Toggle active sidebar highlight
+                $('.lecture-sidebar-item').removeClass('active').css('background', 'transparent');
+                $(this).addClass('active').css('background', 'rgba(168, 85, 247, 0.1)');
+
+                var id = $(this).data('id');
+                var title = $(this).data('title');
+                var type = $(this).data('type');
+                var body = $(this).data('body');
+                var video = $(this).data('video');
+
+                // Switch UI visibility
+                $('#welcomeArea').addClass('d-none');
+                $('#lectureDisplayArea').removeClass('d-none');
+
+                // Update text
+                $('#activeLectureTitle').text(title);
+                $('#activeLectureType').html('<i class="fa-solid fa-tags me-1"></i> ' + type);
+
+                // Video control
+                var iframe = $('#activeVideoIframe');
+                var videoContainer = $('#activeVideoContainer');
+                
+                // Clear active source to stop playback
+                iframe.attr('src', '');
+                videoContainer.addClass('d-none');
+
+                if (type === 'Video' && video) {
+                    videoContainer.removeClass('d-none');
+                    // Parse YouTube URLs to embed format
+                    var embedUrl = video;
+                    if (video.includes('youtube.com/watch?v=')) {
+                        var vId = video.split('v=')[1];
+                        var ampPos = vId.indexOf('&');
+                        if(ampPos != -1) {
+                            vId = vId.substring(0, ampPos);
+                        }
+                        embedUrl = "https://www.youtube.com/embed/" + vId + "?autoplay=0";
+                    } else if (video.includes('youtu.be/')) {
+                        var vId = video.split('youtu.be/')[1];
+                        embedUrl = "https://www.youtube.com/embed/" + vId + "?autoplay=0";
+                    }
+                    iframe.attr('src', embedUrl);
+                }
+
+                // Body text control
+                var bodyContainer = $('#activeLectureBody');
+                if (body) {
+                    bodyContainer.html(body);
+                } else if (type === 'Video') {
+                    bodyContainer.html('<p class="text-secondary italic"><i class="fa-solid fa-info-circle me-1"></i> Bài học này là một video. Hãy theo dõi video clip phía trên.</p>');
+                } else {
+                    bodyContainer.html('<p class="text-secondary italic">Bài giảng này không có nội dung chữ bổ sung.</p>');
+                }
+            });
+
+            // Auto click first item if available
+            var firstItem = $('.lecture-sidebar-item').first();
+            if (firstItem.length > 0) {
+                firstItem.click();
+            }
+        });
+    </script>
+}

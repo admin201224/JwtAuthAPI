@@ -1,6 +1,7 @@
-using System.Security.Cryptography;
+using System.Text;
 using System.Text;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using JwtAuthAPI.Data;
 using JwtAuthAPI.Models;
 using JwtAuthAPI.Services;
@@ -42,7 +43,7 @@ namespace JwtAuthAPI.Controllers
 
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
-            return Ok();
+            return Ok(new { message = "User registered successfully" });
         }
 
         [HttpPost("login")]
@@ -59,10 +60,22 @@ namespace JwtAuthAPI.Controllers
             user.RefreshTokens.Add(refreshToken);
             await _db.SaveChangesAsync();
 
+            // Set refresh token in HttpOnly, Secure cookie
+            Response.Cookies.Append(
+                "refreshToken",
+                refreshToken.Token,
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = refreshToken.ExpiresAt
+                }
+            );
+
             return Ok(new
             {
                 accessToken,
-                refreshToken = refreshToken.Token,
                 refreshTokenId = refreshToken.TokenId
             });
         }
@@ -70,24 +83,28 @@ namespace JwtAuthAPI.Controllers
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh([FromBody] RefreshDto dto)
         {
-            // dto: { accessToken, refreshToken }
             var principal = _tokenService.GetPrincipalFromExpiredToken(dto.AccessToken);
             if (principal == null) return BadRequest("Invalid access token");
 
-            var userIdString = principal.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            var userIdString = principal.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userIdString)) return BadRequest("Invalid access token");
             var userId = int.Parse(userIdString);
             var user = await _db.Users.Include(u => u.RefreshTokens).FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null) return BadRequest("User not found");
 
-            var stored = user.RefreshTokens.FirstOrDefault(rt => rt.Token == dto.RefreshToken);
+            // Get refresh token from cookie
+            var refreshTokenFromCookie = Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(refreshTokenFromCookie))
+                return Unauthorized("Refresh token missing");
+
+            var stored = user.RefreshTokens.FirstOrDefault(rt => rt.Token == refreshTokenFromCookie);
             if (stored == null || stored.IsRevoked || stored.ExpiresAt <= DateTime.UtcNow)
                 return Unauthorized("Invalid refresh token");
 
-            // revoke old refresh token
+            // Revoke old refresh token
             stored.IsRevoked = true;
 
-            // create new tokens
+            // Create new tokens
             var newAccessToken = _tokenService.GenerateAccessToken(user);
             var newRefreshToken = _tokenService.GenerateRefreshToken();
             newRefreshToken.UserId = user.Id;
@@ -95,10 +112,22 @@ namespace JwtAuthAPI.Controllers
 
             await _db.SaveChangesAsync();
 
+            // Set new refresh token in HttpOnly cookie
+            Response.Cookies.Append(
+                "refreshToken",
+                newRefreshToken.Token,
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = newRefreshToken.ExpiresAt
+                }
+            );
+
             return Ok(new
             {
                 accessToken = newAccessToken,
-                refreshToken = newRefreshToken.Token,
                 refreshTokenId = newRefreshToken.TokenId
             });
         }
@@ -106,14 +135,21 @@ namespace JwtAuthAPI.Controllers
         [HttpPost("revoke")]
         public async Task<IActionResult> Revoke([FromBody] RevokeDto dto)
         {
+
+            if (string.IsNullOrEmpty(dto.RefreshToken))
+                return BadRequest("Refresh token missing");
+
             var token = await _db.RefreshTokens.FirstOrDefaultAsync(t => t.Token == dto.RefreshToken);
             if (token == null) return NotFound();
             token.IsRevoked = true;
             await _db.SaveChangesAsync();
-            return Ok();
+
+            // Clear cookie
+            Response.Cookies.Delete("refreshToken");
+            return Ok(new { message = "Logged out successfully" });
         }
 
-        // helper password methods
+        // Helper password methods
         private void CreatePasswordHash(string password, out byte[] hash, out byte[] salt)
         {
             using var hmac = new HMACSHA512();
@@ -128,5 +164,4 @@ namespace JwtAuthAPI.Controllers
             return computed.SequenceEqual(storedHash);
         }
     }
-
 }

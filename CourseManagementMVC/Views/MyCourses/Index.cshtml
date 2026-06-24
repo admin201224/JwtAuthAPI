@@ -1,0 +1,127 @@
+@model IEnumerable<CourseManagementMVC.Models.EnrollmentViewModel>
+@{
+    ViewData["Title"] = "Khóa học của tôi";
+}
+
+<div class="mb-5">
+    <h1 class="font-weight-extrabold text-white mb-1">Khóa học của tôi</h1>
+    <p class="text-secondary mb-0">Theo dõi tiến trình học tập và hoàn thành các mục tiêu đào tạo của bạn</p>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card-premium p-5 text-center">
+        <i class="fa-solid fa-graduation-cap fa-3x text-secondary mb-3"></i>
+        <h3 class="text-white">Bạn chưa đăng ký khóa học nào</h3>
+        <p class="text-secondary mb-4">Khám phá danh sách khóa học của chúng tôi để chọn chủ đề phù hợp và bắt đầu học.</p>
+        <a asp-controller="Courses" asp-action="Index" class="btn btn-premium">
+            <i class="fa-solid fa-search me-1"></i> Khám phá khóa học ngay
+        </a>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var enrollment in Model)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card-premium h-100 d-flex flex-column">
+                    <!-- Thumbnail with fallback -->
+                    <div class="position-relative">
+                        @if (!string.IsNullOrEmpty(enrollment.CourseThumbnailUrl))
+                        {
+                            <img src="@enrollment.CourseThumbnailUrl" class="card-premium-img w-100" alt="@enrollment.CourseTitle" onerror="this.src='https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&auto=format&fit=crop&q=60';" />
+                        }
+                        else
+                        {
+                            <div class="w-100 d-flex align-items-center justify-content-center card-premium-img text-white" style="background: var(--primary-gradient);">
+                                <i class="fa-solid fa-graduation-cap fa-3x"></i>
+                            </div>
+                        }
+
+                        <div class="position-absolute top-0 end-0 m-3">
+                            @{
+                                var statusClass = enrollment.Status.ToLower() switch
+                                {
+                                    "completed" => "status-completed",
+                                    "inprogress" => "status-inprogress",
+                                    _ => "status-notstarted"
+                                };
+
+                                var statusText = enrollment.Status switch
+                                {
+                                    "Completed" => "Đã hoàn thành",
+                                    "InProgress" => "Đang học",
+                                    _ => "Chưa bắt đầu"
+                                };
+                            }
+                            <span class="badge-custom @statusClass">
+                                @if (enrollment.Status == "Completed")
+                                {
+                                    <i class="fa-solid fa-circle-check"></i>
+                                }
+                                else if (enrollment.Status == "InProgress")
+                                {
+                                    <i class="fa-solid fa-spinner fa-spin-pulse"></i>
+                                }
+                                else
+                                {
+                                    <i class="fa-solid fa-circle-play"></i>
+                                }
+                                @statusText
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="p-4 d-flex flex-column flex-grow-1">
+                        <h4 class="card-title text-white font-weight-bold mb-2 text-truncate" title="@enrollment.CourseTitle">
+                            @enrollment.CourseTitle
+                        </h4>
+                        
+                        <div class="mb-4 small text-secondary">
+                            <span class="d-block mb-1"><i class="fa-regular fa-calendar-alt me-1"></i> Đăng ký ngày: @enrollment.EnrolledAt.ToString("dd/MM/yyyy")</span>
+                        </div>
+
+                        <!-- Progress Bar helper -->
+                        <div class="mb-4">
+                            <span class="d-block text-secondary small mb-1">Tiến độ khóa học</span>
+                            <div class="progress bg-dark" style="height: 6px; border-radius: 3px;">
+                                @{
+                                    var percent = enrollment.Status switch
+                                    {
+                                        "Completed" => 100,
+                                        "InProgress" => 50,
+                                        _ => 0
+                                    };
+                                }
+                                <div class="progress-bar bg-purple" role="progressbar" style="width: @(percent)%; background: var(--primary-gradient);" aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+
+                        <!-- Dropdown update status -->
+                        <div class="mb-4">
+                            <form asp-action="UpdateStatus" method="post" class="d-flex align-items-center gap-2">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="enrollmentId" value="@enrollment.Id" />
+                                <input type="hidden" name="redirectUrl" value="@Context.Request.Path" />
+                                <label class="text-secondary small me-1">Trạng thái:</label>
+                                <select name="status" class="form-select form-glass form-select-sm text-white flex-grow-1" style="background-color: var(--bg-dark); font-size: 0.85rem;" onchange="this.form.submit()">
+                                    <!option value="NotStarted" @(enrollment.Status == "NotStarted" ? "selected" : "")>Chưa bắt đầu</!option>
+                                    <!option value="InProgress" @(enrollment.Status == "InProgress" ? "selected" : "")>Đang học</!option>
+                                    <!option value="Completed" @(enrollment.Status == "Completed" ? "selected" : "")>Đã hoàn thành</!option>
+                                </select>
+                            </form>
+                        </div>
+
+                        <div class="mt-auto">
+                            <a asp-action="Study" asp-route-id="@enrollment.CourseId" class="btn btn-premium w-100">
+                                <i class="fa-solid fa-play me-1 small"></i> Vào học / Xem bài giảng
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

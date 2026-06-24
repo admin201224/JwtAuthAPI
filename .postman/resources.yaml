@@ -1,0 +1,10 @@
+workspace:
+  id: 9c7e4cf6-7189-4b04-8c76-24af3fd3bf34
+localResources:
+  specs:
+    - ..\JwtAuthAPI\obj\Debug\net9.0\EndpointInfo\JwtAuthAPI.json
+cloudResources:
+  collections:
+    ../postman/collections/REST API basics- CRUD, test & variable: 55946547-573e43fd-279d-431a-8879-2045069d3cc0
+    ../postman/collections/New Collection: 55946547-69b9cbf6-3ea9-4899-96fb-d7334a655892
+    ../postman/collections/My Collection: 55946547-7524c5ce-9e05-4c8b-a6db-0940f0870046

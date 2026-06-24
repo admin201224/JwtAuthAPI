@@ -1,4 +1,5 @@
 using JwtAuthAPI.Data;
+using JwtAuthAPI.Data;
 using JwtAuthAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -6,7 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);   
 var configuration = builder.Configuration;
 
 // DbContext
@@ -62,15 +63,50 @@ builder.Services.AddSwaggerGen(c =>
                     Id = "Bearer"
                 }
             },
-            new string[] {}
+            new string[] { }
         }
     });
 });
 
-// DI cho TokenService
+// DI services
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IOAuthService, OAuthService>();
+builder.Services.AddScoped<SeedDataService>();
+builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddScoped<ICourseContentService, CourseContentService>();
+builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
+
+// HTTP Client for OAuth
+builder.Services.AddHttpClient();
+
+// Logging
+builder.Services.AddLogging();
+
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5273", "https://localhost:7273")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
+    });
+});
 
 var app = builder.Build();
+
+// Auto migrate database & seed data
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+
+    // Seed default data
+    var seedService = scope.ServiceProvider.GetRequiredService<SeedDataService>();
+    await seedService.SeedAsync();
+}
 
 if (app.Environment.IsDevelopment())
 {
@@ -82,6 +118,8 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseHttpsRedirection();
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

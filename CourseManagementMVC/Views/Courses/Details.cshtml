@@ -1,0 +1,254 @@
+@model CourseManagementMVC.Models.CourseDetailsViewModel
+@{
+    ViewData["Title"] = Model.Course.Title;
+}
+
+<!-- Course Header Banner -->
+<div class="details-banner">
+    <div class="row align-items-center">
+        <div class="col-lg-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-3">
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-secondary text-decoration-none">Khóa học</a></li>
+                    <li class="breadcrumb-item active text-white" aria-current="page">Chi tiết</li>
+                </ol>
+            </nav>
+            <h1 class="font-weight-extrabold text-white mb-3" style="font-size: 2.5rem; font-weight: 800;">@Model.Course.Title</h1>
+            <p class="text-light opacity-75 mb-4" style="font-size: 1.1rem; max-width: 700px;">
+                @(Model.Course.Description.Length > 200 ? Model.Course.Description.Substring(0, 197) + "..." : Model.Course.Description)
+            </p>
+
+            <div class="d-flex flex-wrap gap-4 align-items-center mb-4">
+                <span class="badge-custom badge-online py-2 px-3">
+                    <i class="fa-solid fa-desktop"></i> @Model.Course.LearningMode
+                </span>
+                <span class="text-light"><i class="fa-regular fa-clock me-1 text-purple"></i> @Model.Course.DurationHours giờ học</span>
+                <span class="text-light"><i class="fa-solid fa-layer-group me-1 text-pink"></i> Cấp độ: @Model.Course.Level</span>
+                <span class="text-light"><i class="fa-regular fa-calendar me-1 text-info"></i> Cập nhật: @Model.Course.UpdatedAt.ToString("dd/MM/yyyy")</span>
+            </div>
+        </div>
+
+        <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+            <div class="card-premium p-4 d-inline-block text-start w-100" style="max-width: 380px;">
+                <span class="text-secondary small d-block mb-1">Giá trị đầu tư</span>
+                <h2 class="text-white font-weight-black mb-4" style="font-size: 2rem; font-weight: 800;">
+                    @(Model.Course.Price == 0 ? "Miễn phí" : string.Format("{0:N0} đ", Model.Course.Price))
+                </h2>
+
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    if (Model.IsEnrolled)
+                    {
+                        <div class="d-flex flex-column gap-2">
+                            <a asp-controller="MyCourses" asp-action="Study" asp-route-id="@Model.Course.Id" class="btn btn-premium w-100 py-3">
+                                <i class="fa-solid fa-play-circle me-1"></i> Vào học ngay
+                            </a>
+                            <span class="d-block text-center text-secondary small my-2">Trạng thái: <strong>@Model.EnrollmentStatus</strong></span>
+                            
+                            <form asp-action="Unenroll" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn hủy đăng ký khóa học này?');">
+                                <input type="hidden" name="enrollmentId" value="@Model.EnrollmentId" />
+                                <input type="hidden" name="courseId" value="@Model.Course.Id" />
+                                <button type="submit" class="btn btn-dark-glass btn-sm w-100 py-2 text-danger">
+                                    <i class="fa-solid fa-circle-minus me-1"></i> Hủy đăng ký học
+                                </button>
+                            </form>
+                        </div>
+                    }
+                    else
+                    {
+                        <form asp-action="Enroll" method="post">
+                            <input type="hidden" name="courseId" value="@Model.Course.Id" />
+                            <button type="submit" class="btn btn-premium w-100 py-3">
+                                <i class="fa-solid fa-cart-plus me-1"></i> Đăng ký học ngay
+                            </button>
+                        </form>
+                    }
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Context.Request.Path" class="btn btn-premium w-100 py-3">
+                        Đăng nhập để học <i class="fa-solid fa-arrow-right ms-1"></i>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Main Content -->
+    <div class="col-lg-8">
+        <!-- Description Card -->
+        <div class="card-premium p-4 mb-4">
+            <h3 class="text-white font-weight-bold mb-3 border-bottom pb-2 border-secondary" style="border-color: rgba(255, 255, 255, 0.08) !important;">Giới thiệu khóa học</h3>
+            <p class="text-secondary" style="line-height: 1.8; white-space: pre-line;">@Model.Course.Description</p>
+        </div>
+
+        <!-- Lectures List Card -->
+        <div class="card-premium p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2 border-secondary" style="border-color: rgba(255, 255, 255, 0.08) !important;">
+                <h3 class="text-white font-weight-bold mb-0">Nội dung chương trình</h3>
+                <span class="badge bg-secondary">@Model.Contents.Count bài học</span>
+            </div>
+
+            @if (!Model.Contents.Any())
+            {
+                <p class="text-secondary text-center py-4">Chưa có bài học nào được tải lên cho khóa này.</p>
+            }
+            else
+            {
+                <div class="accordion accordion-flush" id="accordionLectures">
+                    @foreach (var content in Model.Contents)
+                    {
+                        var targetId = $"collapse_{content.Id}";
+                        <div class="accordion-item bg-transparent border-bottom border-secondary py-2" style="border-color: rgba(255, 255, 255, 0.08) !important;">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="d-flex align-items-center justify-content-center bg-dark text-purple rounded" style="width: 36px; height: 36px; background-color: rgba(255, 255, 255, 0.03) !important;">
+                                        @if (content.ContentType == "Video")
+                                        {
+                                            <i class="fa-solid fa-circle-play text-purple"></i>
+                                        }
+                                        else if (content.ContentType == "Quiz")
+                                        {
+                                            <i class="fa-solid fa-circle-question text-info"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="fa-solid fa-file-invoice text-pink"></i>
+                                        }
+                                    </div>
+                                    <div>
+                                        <span class="text-white d-block font-weight-semibold">Bài @content.OrderIndex: @content.Title</span>
+                                        <span class="text-secondary small">Loại: @content.ContentType</span>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    @if (content.IsPreview)
+                                    {
+                                        <span class="badge-custom badge-preview me-2"><i class="fa-solid fa-eye"></i> Học thử</span>
+                                        <button type="button" class="btn btn-sm btn-dark-glass py-1 px-3 btn-preview-lecture" 
+                                                data-title="@content.Title" 
+                                                data-type="@content.ContentType" 
+                                                data-body="@content.Body" 
+                                                data-video="@content.VideoUrl"
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#previewModal">
+                                            Xem thử
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <i class="fa-solid fa-lock text-secondary opacity-50 me-2" title="Yêu cầu đăng ký học"></i>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Sidebar Info -->
+    <div class="col-lg-4">
+        <div class="card-premium p-4 mb-4">
+            <h4 class="text-white font-weight-bold mb-3">Thông tin bổ sung</h4>
+            <ul class="list-unstyled mb-0 d-flex flex-column gap-3 text-secondary small">
+                <li class="d-flex justify-content-between">
+                    <span>Đơn vị tổ chức:</span>
+                    <strong class="text-white">EdTech Hub</strong>
+                </li>
+                <li class="d-flex justify-content-between">
+                    <span>Người tạo:</span>
+                    <strong class="text-white">@Model.Course.CreatedByUsername</strong>
+                </li>
+                <li class="d-flex justify-content-between">
+                    <span>Hình thức:</span>
+                    <strong class="text-white">@Model.Course.LearningMode</strong>
+                </li>
+                <li class="d-flex justify-content-between">
+                    <span>Cấp độ:</span>
+                    <strong class="text-white">@Model.Course.Level</strong>
+                </li>
+                <li class="d-flex justify-content-between">
+                    <span>Thời hạn sở hữu:</span>
+                    <strong class="text-white">Trọn đời</strong>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Lecture Preview Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content bg-dark border-secondary" style="border-radius: 16px; border-color: rgba(255, 255, 255, 0.08) !important;">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title text-white font-weight-bold" id="previewModalLabel">Xem thử bài học</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div id="videoContainer" class="ratio ratio-16x9 mb-3 d-none">
+                    <iframe id="videoIframe" src="" title="Video preview" allowfullscreen></iframe>
+                </div>
+                <div id="bodyContainer" class="text-light" style="max-height: 400px; overflow-y: auto; white-space: pre-line; line-height: 1.8;">
+                    <!-- Content will be injected here -->
+                </div>
+            </div>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-dark-glass" data-bs-dismiss="modal">Đóng lại</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('.btn-preview-lecture').on('click', function() {
+                var title = $(this).data('title');
+                var type = $(this).data('type');
+                var body = $(this).data('body');
+                var video = $(this).data('video');
+
+                $('#previewModalLabel').text("Học thử: " + title);
+
+                // Reset modal content
+                $('#videoContainer').addClass('d-none');
+                $('#videoIframe').attr('src', '');
+                $('#bodyContainer').empty().addClass('d-none');
+
+                if (type === 'Video' && video) {
+                    $('#videoContainer').removeClass('d-none');
+                    // Simple regex to parse youtube urls to embed format
+                    var embedUrl = video;
+                    if (video.includes('youtube.com/watch?v=')) {
+                        var id = video.split('v=')[1];
+                        var ampersandPosition = id.indexOf('&');
+                        if(ampersandPosition != -1) {
+                            id = id.substring(0, ampersandPosition);
+                        }
+                        embedUrl = "https://www.youtube.com/embed/" + id;
+                    } else if (video.includes('youtu.be/')) {
+                        var id = video.split('youtu.be/')[1];
+                        embedUrl = "https://www.youtube.com/embed/" + id;
+                    }
+                    $('#videoIframe').attr('src', embedUrl);
+                }
+                
+                if (body) {
+                    $('#bodyContainer').html(body).removeClass('d-none');
+                } else if (type === 'Video') {
+                    $('#bodyContainer').html('<p class="text-secondary italic">Bài học này là một bài giảng video.</p>').removeClass('d-none');
+                }
+            });
+
+            // Stop video playing when closing modal
+            $('#previewModal').on('hide.bs.modal', function () {
+                $('#videoIframe').attr('src', '');
+            });
+        });
+    </script>
+}
