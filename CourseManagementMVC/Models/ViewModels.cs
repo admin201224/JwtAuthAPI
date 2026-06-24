@@ -81,10 +81,10 @@ namespace CourseManagementMVC.Models
         public string Status { get; set; } = "Active";
 
         [Display(Name = "Ngày tạo")]
-        public DateTime CreatedAt { get; set; }
+        public DateTime? CreatedAt { get; set; }
 
         [Display(Name = "Ngày cập nhật")]
-        public DateTime UpdatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
 
         public int CreatedByUserId { get; set; }
         public string? CreatedByUsername { get; set; }
@@ -117,10 +117,10 @@ namespace CourseManagementMVC.Models
         public bool IsPreview { get; set; }
 
         [Display(Name = "Ngày tạo")]
-        public DateTime CreatedAt { get; set; }
+        public DateTime? CreatedAt { get; set; }
 
         [Display(Name = "Ngày cập nhật")]
-        public DateTime UpdatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 
     public class EnrollmentViewModel
@@ -132,8 +132,8 @@ namespace CourseManagementMVC.Models
         public string CourseTitle { get; set; } = string.Empty;
         public string CourseThumbnailUrl { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty; // NotStarted, InProgress, Completed
-        public DateTime EnrolledAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
+        public DateTime? EnrolledAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 
     public class CourseDetailsViewModel
