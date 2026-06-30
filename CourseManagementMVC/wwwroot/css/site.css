@@ -204,10 +204,7 @@ header {
 
 /* Footer */
 footer {
-    background: #090d16;
-    border-top: 1px solid var(--border-color);
-    padding: 24px 0;
-    margin-top: auto;
+    
 }
 
 /* Custom Scrollbar */

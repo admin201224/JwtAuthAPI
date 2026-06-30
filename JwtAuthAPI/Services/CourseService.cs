@@ -61,25 +61,34 @@ namespace JwtAuthAPI.Services
             CourseStatus? status = null,
             CourseLevel? level = null)
         {
-            var query = _db.Courses
+            try
+            {
+                var query = _db.Courses
                            .Include(c => c.CreatedBy)
                            .AsNoTracking()
                            .AsQueryable();
 
-            if (mode.HasValue)
-                query = query.Where(c => c.LearningMode == mode.Value);
+                if (mode.HasValue)
+                    query = query.Where(c => c.LearningMode == mode.Value);
 
-            if (status.HasValue)
-                query = query.Where(c => c.Status == status.Value);
+                if (status.HasValue)
+                    query = query.Where(c => c.Status == status.Value);
 
-            if (level.HasValue)
-                query = query.Where(c => c.Level == level.Value);
+                if (level.HasValue)
+                    query = query.Where(c => c.Level == level.Value);
 
-            var courses = await query
-                .OrderByDescending(c => c.CreatedAt)
-                .ToListAsync();
+                var courses = await query
+                    .OrderByDescending(c => c.CreatedAt)
+                    .ToListAsync();
 
-            return courses.Select(MapToDto).ToList();
+                return courses.Select(MapToDto).ToList();
+            }
+            catch (Exception ex)
+            {
+                var msg = ex.Message;
+                throw;
+            }
+            
         }
 
         // ── GetById ───────────────────────────────────────────────────────

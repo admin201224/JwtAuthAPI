@@ -1,5 +1,7 @@
+using System;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Reflection.Emit;
 using System.Text.Json;
 using CourseManagementMVC.Models;
 
@@ -84,18 +86,29 @@ namespace CourseManagementMVC.Services
             return null;
         }
 
-        public async Task<bool> CreateCourseAsync(CourseViewModel course)
+        public async Task<bool> CreateCourseAsync(CreateCourseDto course)
         {
             AddAuthHeader();
-            var response = await _client.PostAsJsonAsync("api/course", course, _jsonOptions);
+
+            var response = await _client.PostAsJsonAsync("api/course", course);
             return response.IsSuccessStatusCode;
         }
 
         public async Task<bool> UpdateCourseAsync(int id, CourseViewModel course)
         {
             AddAuthHeader();
-            var response = await _client.PutAsJsonAsync($"api/course/{id}", course, _jsonOptions);
-            return response.IsSuccessStatusCode;
+            var dto = UpdateCourseDto.From(course);
+            var response = await _client.PutAsJsonAsync($"api/course/{id}", dto, _jsonOptions);
+            if (!response.IsSuccessStatusCode) return false;
+
+            // Cập nhật Status riêng qua PATCH endpoint nếu có
+            if (!string.IsNullOrEmpty(course.Status))
+            {
+                await _client.PatchAsJsonAsync($"api/course/{id}/status",
+                    new { status = course.Status }, _jsonOptions);
+            }
+
+            return true;
         }
 
         public async Task<bool> DeleteCourseAsync(int id)
@@ -185,6 +198,26 @@ namespace CourseManagementMVC.Services
             return new List<EnrollmentViewModel>();
         }
 
+        // USERS
+        public async Task<List<UserViewModel>> GetAllUsersAsync()
+        {
+            AddAuthHeader();
+            var response = await _client.GetAsync("api/user");
+            if (response.IsSuccessStatusCode)
+            {
+                var wrapper = await response.Content.ReadFromJsonAsync<UsersWrapper>(_jsonOptions);
+                return wrapper?.Users ?? new List<UserViewModel>();
+            }
+            return new List<UserViewModel>();
+        }
+
+        public async Task<bool> DeleteUserAsync(int id)
+        {
+            AddAuthHeader();
+            var response = await _client.DeleteAsync($"api/user/{id}");
+            return response.IsSuccessStatusCode;
+        }
+
         // Wrapper helper classes
         private class CoursesWrapper
         {
@@ -204,6 +237,11 @@ namespace CourseManagementMVC.Services
         private class EnrollmentsWrapper
         {
             public List<EnrollmentViewModel> Enrollments { get; set; } = new();
+        }
+
+        private class UsersWrapper
+        {
+            public List<UserViewModel> Users { get; set; } = new();
         }
     }
 }

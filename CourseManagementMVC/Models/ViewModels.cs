@@ -78,7 +78,7 @@ namespace CourseManagementMVC.Models
         public string Level { get; set; } = string.Empty; // ví dụ: Beginner, Intermediate, Advanced
 
         [Display(Name = "Trạng thái")]
-        public string Status { get; set; } = "Active";
+        public string Status { get; set; } = "Draft";
 
         [Display(Name = "Ngày tạo")]
         public DateTime? CreatedAt { get; set; }
@@ -143,5 +143,22 @@ namespace CourseManagementMVC.Models
         public bool IsEnrolled { get; set; }
         public int? EnrollmentId { get; set; }
         public string? EnrollmentStatus { get; set; } // NotStarted, InProgress, Completed
+    }
+
+    public class UserViewModel
+    {
+        public int Id { get; set; }
+
+        [Display(Name = "Tên đăng nhập")]
+        public string Username { get; set; } = string.Empty;
+
+        [Display(Name = "Email")]
+        public string Email { get; set; } = string.Empty;
+
+        [Display(Name = "Vai trò")]
+        public string Role { get; set; } = string.Empty;
+
+        [Display(Name = "Ngày tạo")]
+        public DateTime? CreatedAt { get; set; }
     }
 }

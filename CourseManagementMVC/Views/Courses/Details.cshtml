@@ -24,7 +24,7 @@
                 </span>
                 <span class="text-light"><i class="fa-regular fa-clock me-1 text-purple"></i> @Model.Course.DurationHours giờ học</span>
                 <span class="text-light"><i class="fa-solid fa-layer-group me-1 text-pink"></i> Cấp độ: @Model.Course.Level</span>
-                <span class="text-light"><i class="fa-regular fa-calendar me-1 text-info"></i> Cập nhật: @Model.Course.UpdatedAt.?ToString("dd/MM/yyyy")</span>
+                <span class="text-light"><i class="fa-regular fa-calendar me-1 text-info"></i> Cập nhật: @Model.Course.UpdatedAt?.ToString("dd/MM/yyyy")</span>
             </div>
         </div>
 

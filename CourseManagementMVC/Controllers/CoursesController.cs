@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using CourseManagementMVC.Models;
 using CourseManagementMVC.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -95,7 +94,7 @@ namespace CourseManagementMVC.Controllers
         [Authorize(Roles = "Admin,Instructor")]
         public IActionResult Create()
         {
-            return View(new CourseViewModel { Status = "Active", LearningMode = "Online" });
+            return View(new CourseViewModel { Status = "Draft", LearningMode = "Online" });
         }
 
         // POST: Courses/Create
@@ -109,7 +108,8 @@ namespace CourseManagementMVC.Controllers
                 return View(model);
             }
 
-            var success = await _apiService.CreateCourseAsync(model);
+            var courseDTO = CreateCourseDto.From(model);
+            var success = await _apiService.CreateCourseAsync(courseDTO);
             if (success)
             {
                 TempData["SuccessMessage"] = "Thêm khóa học mới thành công!";
@@ -205,7 +205,7 @@ namespace CourseManagementMVC.Controllers
                 return NotFound();
             }
             ViewBag.Course = course;
-            
+
             // Get next order index
             var contents = await _apiService.GetCourseContentsAsync(courseId);
             var nextIndex = contents.Any() ? contents.Max(c => c.OrderIndex) + 1 : 1;
