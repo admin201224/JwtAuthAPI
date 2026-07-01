@@ -71,11 +71,11 @@ namespace JwtAuthAPI.Data
                       .HasForeignKey(e => e.UserId)
                       .OnDelete(DeleteBehavior.Restrict);
 
-                // Enrollment → Course (Restrict — xóa course thì không tự xóa enrollment)
+                // Enrollment → Course (Cascade — xóa course thì xóa luôn tất cả enrollment)
                 entity.HasOne(e => e.Course)
                       .WithMany(c => c.Enrollments)
                       .HasForeignKey(e => e.CourseId)
-                      .OnDelete(DeleteBehavior.Restrict);
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
             base.OnModelCreating(modelBuilder);
