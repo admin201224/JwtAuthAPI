@@ -9,12 +9,10 @@ namespace JwtAuthAPI.Models
         [MaxLength(300)]
         public string Title { get; set; } = null!;
 
-        public ContentType ContentType { get; set; } = ContentType.Lecture;
+        [MaxLength(100)]
+        public string ContentType { get; set; } = "PDF";
 
-        public string? Body { get; set; }
-
-        [Url(ErrorMessage = "VideoUrl phải là URL hợp lệ")]
-        public string? VideoUrl { get; set; }
+        public string? Description { get; set; }
 
         [Range(0, 9999)]
         public int OrderIndex { get; set; } = 0;
@@ -28,12 +26,10 @@ namespace JwtAuthAPI.Models
         [MaxLength(300)]
         public string? Title { get; set; }
 
-        public ContentType? ContentType { get; set; }
+        [MaxLength(100)]
+        public string? ContentType { get; set; }
 
-        public string? Body { get; set; }
-
-        [Url(ErrorMessage = "VideoUrl phải là URL hợp lệ")]
-        public string? VideoUrl { get; set; }
+        public string? Description { get; set; }
 
         [Range(0, 9999)]
         public int? OrderIndex { get; set; }

@@ -21,32 +21,31 @@ namespace JwtAuthAPI.Services
             Id          = c.Id,
             CourseId    = c.CourseId,
             Title       = c.Title,
-            ContentType = c.ContentType.ToString(),
+            ContentType = c.ContentType,
             ContentTypeDisplay = c.ContentType switch
             {
-                ContentType.Lecture  => "Bài giảng",
-                ContentType.Video    => "Video",
-                ContentType.Quiz     => "Bài kiểm tra",
-                ContentType.Document => "Tài liệu",
-                _                   => c.ContentType.ToString()
+                "PDF"   => "PDF",
+                "DOCX"  => "Word",
+                "PPTX"  => "PowerPoint",
+                "VIDEO" => "Video",
+                _       => c.ContentType
             },
-            Body              = c.Body,
-            VideoUrl          = c.VideoUrl,
-            OrderIndex        = c.OrderIndex,
-            IsPreview         = c.IsPreview,
+            Body              = c.Description,
+            VideoUrl          = null,
+            OrderIndex        = 0,
+            IsPreview         = false,
             CreatedAt         = c.CreatedAt,
             UpdatedAt         = c.UpdatedAt,
             CreatedByUserId   = c.CreatedByUserId,
-            CreatedByUsername = c.CreatedBy?.Username
+            CreatedByUsername = c.CreatedByUser?.Username
         };
 
         // ── GetByCourseId ─────────────────────────────────────────────────
         public async Task<List<ContentResponseDto>> GetByCourseIdAsync(int courseId)
         {
             var contents = await _db.CourseContents
-                                    .Include(c => c.CreatedBy)
+                                    .Include(c => c.CreatedByUser)
                                     .Where(c => c.CourseId == courseId)
-                                    .OrderBy(c => c.OrderIndex)
                                     .AsNoTracking()
                                     .ToListAsync();
 
@@ -57,7 +56,7 @@ namespace JwtAuthAPI.Services
         public async Task<ContentResponseDto?> GetByIdAsync(int courseId, int contentId)
         {
             var content = await _db.CourseContents
-                                   .Include(c => c.CreatedBy)
+                                   .Include(c => c.CreatedByUser)
                                    .AsNoTracking()
                                    .FirstOrDefaultAsync(c => c.Id == contentId && c.CourseId == courseId);
 
@@ -72,10 +71,9 @@ namespace JwtAuthAPI.Services
                 CourseId        = courseId,
                 Title           = dto.Title,
                 ContentType     = dto.ContentType,
-                Body            = dto.Body,
-                VideoUrl        = dto.VideoUrl,
-                OrderIndex      = dto.OrderIndex,
-                IsPreview       = dto.IsPreview,
+                Description     = dto.Description ?? "",
+                FilePath        = "default.pdf",
+                FileSize        = 0,
                 CreatedAt       = DateTime.UtcNow,
                 CreatedByUserId = userId
             };
@@ -83,7 +81,7 @@ namespace JwtAuthAPI.Services
             _db.CourseContents.Add(content);
             await _db.SaveChangesAsync();
 
-            await _db.Entry(content).Reference(c => c.CreatedBy).LoadAsync();
+            await _db.Entry(content).Reference(c => c.CreatedByUser).LoadAsync();
 
             _logger.LogInformation("Content {ContentId} added to Course {CourseId} by User {UserId}",
                 content.Id, courseId, userId);
@@ -96,7 +94,7 @@ namespace JwtAuthAPI.Services
             int courseId, int contentId, UpdateContentDto dto, int userId, string role)
         {
             var content = await _db.CourseContents
-                                   .Include(c => c.CreatedBy)
+                                   .Include(c => c.CreatedByUser)
                                    .FirstOrDefaultAsync(c => c.Id == contentId && c.CourseId == courseId);
 
             if (content is null) return null;
@@ -105,12 +103,9 @@ namespace JwtAuthAPI.Services
             if (role == "Instructor" && content.CreatedByUserId != userId)
                 return null;
 
-            if (dto.Title is not null)       content.Title       = dto.Title;
-            if (dto.ContentType.HasValue)    content.ContentType = dto.ContentType.Value;
-            if (dto.Body is not null)        content.Body        = dto.Body;
-            if (dto.VideoUrl is not null)    content.VideoUrl    = dto.VideoUrl;
-            if (dto.OrderIndex.HasValue)     content.OrderIndex  = dto.OrderIndex.Value;
-            if (dto.IsPreview.HasValue)      content.IsPreview   = dto.IsPreview.Value;
+            if (dto.Title is not null)       content.Title = dto.Title;
+            if (dto.ContentType is not null) content.ContentType = dto.ContentType;
+            if (dto.Description is not null) content.Description = dto.Description;
             content.UpdatedAt = DateTime.UtcNow;
 
             await _db.SaveChangesAsync();

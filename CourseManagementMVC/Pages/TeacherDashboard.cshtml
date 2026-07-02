@@ -1,0 +1,187 @@
+﻿@page "/dashboard/teacher"
+@model CourseManagementMVC.Pages.TeacherDashboardModel
+@{
+    ViewData["Title"] = "Bảng điều khiển Giáo viên";
+}
+
+<div class="container-fluid py-5">
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="font-weight-extrabold text-white mb-1">
+                        <i class="fas fa-chart-line me-3"></i>Bảng điều khiển Giáo viên
+                    </h1>
+                    <p class="text-secondary">Quản lý khóa học và tài liệu của bạn</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.IsLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-purple" role="status">
+                <span class="visually-hidden">Đang tải...</span>
+            </div>
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            @Model.ErrorMessage
+        </div>
+    }
+    else
+    {
+        <!-- Statistics Cards -->
+        <div class="row mb-5">
+            <div class="col-md-4 mb-3">
+                <div class="card-premium p-4 rounded-lg">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-secondary mb-2">Khóa học</p>
+                            <h3 class="text-white font-weight-extrabold mb-0">@Model.Dashboard.Courses.Count</h3>
+                        </div>
+                        <i class="fas fa-book fa-2x text-purple" style="opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card-premium p-4 rounded-lg">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-secondary mb-2">Tài liệu đã tải</p>
+                            <h3 class="text-white font-weight-extrabold mb-0">@Model.Dashboard.TotalContentsUploaded</h3>
+                        </div>
+                        <i class="fas fa-file-upload fa-2x text-success" style="opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card-premium p-4 rounded-lg">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-secondary mb-2">Lần tải xuống</p>
+                            <h3 class="text-white font-weight-extrabold mb-0">@Model.Dashboard.TotalDownloads</h3>
+                        </div>
+                        <i class="fas fa-download fa-2x text-info" style="opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Courses Section -->
+        <div class="row">
+            @foreach (var course in Model.Dashboard.Courses)
+            {
+                <div class="col-md-12 mb-4">
+                    <div class="card-premium p-4 rounded-lg">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h4 class="text-white font-weight-extrabold mb-2">@course.Name</h4>
+                                <p class="text-secondary mb-2">@course.Description</p>
+                                <div class="d-flex gap-3">
+                                    <span class="badge bg-purple"><i class="fas fa-users me-1"></i>@course.StudentCount học viên</span>
+                                    <span class="badge bg-success"><i class="fas fa-file me-1"></i>@course.Contents.Count tài liệu</span>
+                                </div>
+                            </div>
+                            <a href="/courses/@course.Id/manage-contents" class="btn btn-sm btn-outline-purple">
+                                <i class="fas fa-edit me-1"></i>Quản lý
+                            </a>
+                        </div>
+
+                        @if (course.Contents.Any())
+                        {
+                            <div class="mt-3">
+                                <h6 class="text-white mb-3"><i class="fas fa-folder-open me-2"></i>Tài liệu</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-dark table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Tiêu đề</th>
+                                                <th>Loại</th>
+                                                <th>Kích thước</th>
+                                                <th>Lần tải</th>
+                                                <th>Ngày tải</th>
+                                                <th>Hành động</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var content in course.Contents)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        <i class="fas fa-file-pdf me-2 text-danger"></i>
+                                                        @content.Title
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-info">@content.ContentType</span>
+                                                    </td>
+                                                    <td>@(content.FileSize / 1024 / 1024)MB</td>
+                                                    <td>@content.DownloadCount</td>
+                                                    <td>@content.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-outline-danger delete-content" data-content-id="@content.Id">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info mt-3 mb-0">
+                                <i class="fas fa-info-circle me-2"></i>Chưa có tài liệu nào. 
+                                <a href="/courses/@course.Id/manage-contents">Tải lên tài liệu</a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @if (!Model.Dashboard.Courses.Any())
+            {
+                <div class="col-md-12">
+                    <div class="card-premium p-5 text-center">
+                        <i class="fas fa-inbox fa-3x text-secondary mb-3"></i>
+                        <p class="text-secondary">Bạn chưa quản lý khóa học nào</p>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.delete-content').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                if (!confirm('Bạn có chắc chắn muốn xóa tài liệu này?')) return;
+
+                const contentId = this.dataset.contentId;
+                try {
+                    const response = await fetch(`/api/contentupload/${contentId}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                    });
+
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Lỗi khi xóa tài liệu');
+                    }
+                } catch (err) {
+                    console.error('Error:', err);
+                }
+            });
+        });
+    </script>
+}

@@ -1,0 +1,190 @@
+﻿@page "/dashboard/admin"
+@model CourseManagementMVC.Pages.AdminDashboardModel
+@{
+    ViewData["Title"] = "Bảng điều khiển Quản trị viên";
+}
+
+<div class="container-fluid py-5">
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <h1 class="font-weight-extrabold text-white mb-1">
+                <i class="fas fa-chart-pie me-3"></i>Thống kê Hệ thống
+            </h1>
+            <p class="text-secondary">Tổng quan về hệ thống EdTech Hub</p>
+        </div>
+    </div>
+
+    @if (Model.IsLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-purple" role="status">
+                <span class="visually-hidden">Đang tải...</span>
+            </div>
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            @Model.ErrorMessage
+        </div>
+    }
+    else
+    {
+        <!-- Main Statistics -->
+        <div class="row mb-5">
+            <div class="col-md-3 mb-3">
+                <div class="card-premium p-4 rounded-lg">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-secondary mb-2">Tổng Giáo viên</p>
+                            <h3 class="text-white font-weight-extrabold mb-0">@Model.Dashboard.Statistics.TotalTeachers</h3>
+                        </div>
+                        <i class="fas fa-chalkboard-user fa-2x text-info" style="opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card-premium p-4 rounded-lg">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-secondary mb-2">Tổng Học viên</p>
+                            <h3 class="text-white font-weight-extrabold mb-0">@Model.Dashboard.Statistics.TotalStudents</h3>
+                        </div>
+                        <i class="fas fa-graduation-cap fa-2x text-success" style="opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card-premium p-4 rounded-lg">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-secondary mb-2">Tổng Khóa học</p>
+                            <h3 class="text-white font-weight-extrabold mb-0">@Model.Dashboard.Statistics.TotalCourses</h3>
+                        </div>
+                        <i class="fas fa-book-open fa-2x text-purple" style="opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card-premium p-4 rounded-lg">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-secondary mb-2">Tổng Đăng ký</p>
+                            <h3 class="text-white font-weight-extrabold mb-0">@Model.Dashboard.Statistics.TotalEnrollments</h3>
+                        </div>
+                        <i class="fas fa-user-check fa-2x text-warning" style="opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Most Downloaded Contents -->
+        <div class="row mb-5">
+            <div class="col-md-6">
+                <div class="card-premium p-4 rounded-lg">
+                    <h5 class="text-white font-weight-extrabold mb-4">
+                        <i class="fas fa-fire me-2 text-danger"></i>Tài liệu được tải nhiều nhất
+                    </h5>
+
+                    @if (Model.Dashboard.Statistics.MostDownloadedContents.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm table-dark table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Tiêu đề</th>
+                                        <th>Khóa học</th>
+                                        <th>Lần tải</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        int index = 1;
+                                        @foreach (var content in Model.Dashboard.Statistics.MostDownloadedContents.Take(10))
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @if (index == 1)
+                                                    {
+                                                        <i class="fas fa-medal text-warning"></i>
+                                                    }
+                                                    else if (index == 2)
+                                                    {
+                                                        <i class="fas fa-medal text-secondary"></i>
+                                                    }
+                                                    else if (index == 3)
+                                                    {
+                                                        <i class="fas fa-medal" style="color: #cd7f32;"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        @index
+                                                    }
+                                                </td>
+                                                <td>@content.Title</td>
+                                                <td><small class="text-secondary">@content.CourseName</small></td>
+                                                <td><strong>@content.DownloadCount</strong></td>
+                                            </tr>
+                                            index++;
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-secondary text-center py-4">Chưa có dữ liệu</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Course Statistics -->
+            <div class="col-md-6">
+                <div class="card-premium p-4 rounded-lg">
+                    <h5 class="text-white font-weight-extrabold mb-4">
+                        <i class="fas fa-chart-bar me-2 text-info"></i>Thống kê Khóa học
+                    </h5>
+
+                    @if (Model.Dashboard.Statistics.CourseStatistics.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm table-dark table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Khóa học</th>
+                                        <th>Học viên</th>
+                                        <th>Tài liệu</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var course in Model.Dashboard.Statistics.CourseStatistics)
+                                    {
+                                        <tr>
+                                            <td>@course.Name</td>
+                                            <td>
+                                                <span class="badge bg-success">@course.EnrollmentCount</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">@course.ContentCount</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-secondary text-center py-4">Chưa có dữ liệu</p>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>

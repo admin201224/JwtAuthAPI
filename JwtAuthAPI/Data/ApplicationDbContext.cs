@@ -1,4 +1,5 @@
 using JwtAuthAPI.Models;
+using JwtAuthAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace JwtAuthAPI.Data
@@ -11,6 +12,7 @@ namespace JwtAuthAPI.Data
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Course> Courses { get; set; }
         public DbSet<CourseContent> CourseContents { get; set; }
+        public DbSet<CourseEnrollment> CourseEnrollments { get; set; }
         public DbSet<Enrollment> Enrollments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -41,9 +43,6 @@ namespace JwtAuthAPI.Data
             {
                 entity.Property(c => c.ContentType).HasConversion<string>();
 
-                // Index để sort theo thứ tự bài học
-                entity.HasIndex(c => new { c.CourseId, c.OrderIndex });
-
                 // CourseContent → Course (Cascade — xóa course thì xóa luôn tất cả bài học)
                 entity.HasOne(c => c.Course)
                       .WithMany(course => course.Contents)
@@ -51,9 +50,25 @@ namespace JwtAuthAPI.Data
                       .OnDelete(DeleteBehavior.Cascade);
 
                 // CourseContent → User (Restrict)
-                entity.HasOne(c => c.CreatedBy)
+                entity.HasOne(c => c.CreatedByUser)
                       .WithMany()
                       .HasForeignKey(c => c.CreatedByUserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ── CourseEnrollment ──────────────────────────────────────────
+            modelBuilder.Entity<CourseEnrollment>(entity =>
+            {
+                // CourseEnrollment → Course (Cascade)
+                entity.HasOne(ce => ce.Course)
+                      .WithMany(c => c.Enrollments)
+                      .HasForeignKey(ce => ce.CourseId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // CourseEnrollment → User (Restrict)
+                entity.HasOne(ce => ce.User)
+                      .WithMany()
+                      .HasForeignKey(ce => ce.UserId)
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
@@ -73,7 +88,7 @@ namespace JwtAuthAPI.Data
 
                 // Enrollment → Course (Cascade — xóa course thì xóa luôn tất cả enrollment)
                 entity.HasOne(e => e.Course)
-                      .WithMany(c => c.Enrollments)
+                      .WithMany()
                       .HasForeignKey(e => e.CourseId)
                       .OnDelete(DeleteBehavior.Cascade);
             });

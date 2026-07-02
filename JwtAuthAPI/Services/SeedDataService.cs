@@ -1,4 +1,5 @@
 using JwtAuthAPI.Data;
+using JwtAuthAPI.Data;
 using JwtAuthAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
@@ -86,10 +87,10 @@ namespace JwtAuthAPI.Services
                             {
                                 CourseId = course1.Id,
                                 Title = "Giới thiệu tổng quan về .NET 9 và ASP.NET Core",
-                                ContentType = ContentType.Lecture,
-                                Body = "Chào mừng bạn đến với khóa học ASP.NET Core MVC. Trong bài học này, chúng ta sẽ tìm hiểu lịch sử phát triển của .NET, các điểm mới trong phiên bản .NET 9 và cấu trúc cơ bản của một ứng dụng ASP.NET Core. Bạn sẽ hiểu được tại sao ASP.NET Core là framework hàng đầu cho ứng dụng doanh nghiệp lớn hiện nay.",
-                                OrderIndex = 1,
-                                IsPreview = true,
+                                ContentType = "PDF",
+                                Description = "Chào mừng bạn đến với khóa học ASP.NET Core MVC. Trong bài học này, chúng ta sẽ tìm hiểu lịch sử phát triển của .NET, các điểm mới trong phiên bản .NET 9 và cấu trúc cơ bản của một ứng dụng ASP.NET Core. Bạn sẽ hiểu được tại sao ASP.NET Core là framework hàng đầu cho ứng dụng doanh nghiệp lớn hiện nay.",
+                                FilePath = "introduction.pdf",
+                                FileSize = 1024 * 500, // 500 KB
                                 CreatedByUserId = adminUser.Id,
                                 CreatedAt = DateTime.UtcNow
                             },
@@ -97,11 +98,10 @@ namespace JwtAuthAPI.Services
                             {
                                 CourseId = course1.Id,
                                 Title = "Hướng dẫn cài đặt Visual Studio và SDK .NET 9",
-                                ContentType = ContentType.Video,
-                                VideoUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                                Body = "Bài học này hướng dẫn các bạn cách tải và cài đặt Visual Studio 2022 Community cùng với SDK .NET 9. Hãy làm theo hướng dẫn trong video để thiết lập môi trường lập trình của bạn.",
-                                OrderIndex = 2,
-                                IsPreview = true,
+                                ContentType = "PDF",
+                                Description = "Bài học này hướng dẫn các bạn cách tải và cài đặt Visual Studio 2022 Community cùng với SDK .NET 9. Hãy làm theo hướng dẫn trong video để thiết lập môi trường lập trình của bạn.",
+                                FilePath = "installation_guide.pdf",
+                                FileSize = 1024 * 800, // 800 KB
                                 CreatedByUserId = adminUser.Id,
                                 CreatedAt = DateTime.UtcNow
                             },
@@ -109,10 +109,10 @@ namespace JwtAuthAPI.Services
                             {
                                 CourseId = course1.Id,
                                 Title = "Xây dựng Controller và View đầu tiên",
-                                ContentType = ContentType.Lecture,
-                                Body = "Hôm nay chúng ta sẽ bắt đầu thực hành viết code. Bạn sẽ tạo một Controller mới kế thừa từ Controller base, viết các Action method, và tạo các View tương ứng sử dụng Razor syntax để render dữ liệu động ra HTML.",
-                                OrderIndex = 3,
-                                IsPreview = false,
+                                ContentType = "DOCX",
+                                Description = "Hôm nay chúng ta sẽ bắt đầu thực hành viết code. Bạn sẽ tạo một Controller mới kế thừa từ Controller base, viết các Action method, và tạo các View tương ứng sử dụng Razor syntax để render dữ liệu động ra HTML.",
+                                FilePath = "controller_view_tutorial.docx",
+                                FileSize = 1024 * 300, // 300 KB
                                 CreatedByUserId = adminUser.Id,
                                 CreatedAt = DateTime.UtcNow
                             }
@@ -125,10 +125,10 @@ namespace JwtAuthAPI.Services
                             {
                                 CourseId = course2.Id,
                                 Title = "Tổng quan về Cơ sở dữ liệu quan hệ (RDBMS)",
-                                ContentType = ContentType.Lecture,
-                                Body = "Bài học giới thiệu các khái niệm cốt lõi của Cơ sở dữ liệu quan hệ bao gồm: Bảng (Table), Khóa chính (Primary Key), Khóa ngoại (Foreign Key) và các kiểu dữ liệu thông dụng trong SQL Server.",
-                                OrderIndex = 1,
-                                IsPreview = true,
+                                ContentType = "PDF",
+                                Description = "Bài học giới thiệu các khái niệm cốt lõi của Cơ sở dữ liệu quan hệ bao gồm: Bảng (Table), Khóa chính (Primary Key), Khóa ngoại (Foreign Key) và các kiểu dữ liệu thông dụng trong SQL Server.",
+                                FilePath = "rdbms_overview.pdf",
+                                FileSize = 1024 * 600, // 600 KB
                                 CreatedByUserId = adminUser.Id,
                                 CreatedAt = DateTime.UtcNow
                             },
@@ -136,10 +136,10 @@ namespace JwtAuthAPI.Services
                             {
                                 CourseId = course2.Id,
                                 Title = "Viết câu lệnh SELECT và bộ lọc WHERE cơ bản",
-                                ContentType = ContentType.Lecture,
-                                Body = "Tìm hiểu cách truy vấn dữ liệu từ một bảng bằng SELECT, lọc dữ liệu với mệnh đề WHERE, sắp xếp kết quả bằng ORDER BY và giới hạn số bản ghi trả về.",
-                                OrderIndex = 2,
-                                IsPreview = false,
+                                ContentType = "DOCX",
+                                Description = "Tìm hiểu cách truy vấn dữ liệu từ một bảng bằng SELECT, lọc dữ liệu với mệnh đề WHERE, sắp xếp kết quả bằng ORDER BY và giới hạn số bản ghi trả về.",
+                                FilePath = "select_where_guide.docx",
+                                FileSize = 1024 * 450, // 450 KB
                                 CreatedByUserId = adminUser.Id,
                                 CreatedAt = DateTime.UtcNow
                             }

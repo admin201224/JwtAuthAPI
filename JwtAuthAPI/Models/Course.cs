@@ -38,6 +38,9 @@ namespace JwtAuthAPI.Models
         /// <summary>Tên khóa học</summary>
         public string Title { get; set; } = null!;
 
+        /// <summary>Tên khóa học - alias cho Title</summary>
+        public string Name => Title;
+
         /// <summary>Mô tả ngắn về khóa học</summary>
         public string? Description { get; set; }
 
@@ -62,12 +65,13 @@ namespace JwtAuthAPI.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
 
-        /// <summary>FK — Người tạo khóa học</summary>
+        /// <summary>FK — Người tạo/Giáo viên của khóa học</summary>
         public int CreatedByUserId { get; set; }
+        public int? InstructorId => CreatedByUserId;
         public User CreatedBy { get; set; } = null!;
 
         // Navigation properties
         public ICollection<CourseContent> Contents { get; set; } = new List<CourseContent>();
-        public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
+        public ICollection<CourseEnrollment> Enrollments { get; set; } = new List<CourseEnrollment>();
     }
 }

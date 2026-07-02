@@ -1,8 +1,13 @@
 @model IEnumerable<CourseManagementMVC.Models.CourseViewModel>
 @{
+
     ViewData["Title"] = "Danh sách khóa học";
     // Biến kiểm tra quyền để code bên dưới gọn gàng hơn
     bool isAdminOrInstructor = User.Identity?.IsAuthenticated == true && (User.IsInRole("Admin") || User.IsInRole("Instructor"));
+
+    //Model là new { id = 1, ten = "Nam" };
+
+    var courses = Model;
 }
 
 <div class="d-flex justify-content-between align-items-center mb-5">
@@ -54,7 +59,7 @@ else
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var course in Model)
+                        @foreach (var course in courses)
                         {
                             <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.02)'" onmouseout="this.style.backgroundColor='transparent'">
                                 <td class="py-3 px-4">
