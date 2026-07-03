@@ -74,6 +74,42 @@ namespace CourseManagementMVC.Services
             return new List<CourseViewModel>();
         }
 
+        public async Task<List<CourseViewModel>> SearchCoursesAsync(
+            string? keyword = null,
+            string? learningMode = null,
+            string? level = null,
+            decimal? minPrice = null,
+            decimal? maxPrice = null)
+        {
+            AddAuthHeader();
+            var queryParams = new System.Collections.Generic.Dictionary<string, string>();
+
+            if (!string.IsNullOrWhiteSpace(keyword))
+                queryParams["keyword"] = keyword;
+            if (!string.IsNullOrWhiteSpace(learningMode))
+                queryParams["mode"] = learningMode;
+            if (!string.IsNullOrWhiteSpace(level))
+                queryParams["level"] = level;
+            if (minPrice.HasValue)
+                queryParams["minPrice"] = minPrice.Value.ToString();
+            if (maxPrice.HasValue)
+                queryParams["maxPrice"] = maxPrice.Value.ToString();
+
+            var query = string.Empty;
+            if (queryParams.Any())
+            {
+                query = "?" + string.Join("&", queryParams.Select(x => $"{x.Key}={Uri.EscapeDataString(x.Value)}"));
+            }
+
+            var response = await _client.GetAsync($"api/course{query}");
+            if (response.IsSuccessStatusCode)
+            {
+                var wrapper = await response.Content.ReadFromJsonAsync<CoursesWrapper>(_jsonOptions);
+                return wrapper?.Courses ?? new List<CourseViewModel>();
+            }
+            return new List<CourseViewModel>();
+        }
+
         public async Task<CourseViewModel?> GetCourseByIdAsync(int id)
         {
             AddAuthHeader();
@@ -218,6 +254,56 @@ namespace CourseManagementMVC.Services
             return response.IsSuccessStatusCode;
         }
 
+        // LESSON PROGRESS
+        public async Task<LessonProgressViewModel?> GetOrCreateLessonProgressAsync(int contentId, int courseId)
+        {
+            AddAuthHeader();
+            var response = await _client.GetAsync($"api/lesson-progress/get-or-create/{contentId}/{courseId}");
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<LessonProgressWrapper>(_jsonOptions);
+                return result?.Data;
+            }
+            return null;
+        }
+
+        public async Task<LessonProgressViewModel?> UpdateLessonProgressAsync(int contentId, bool isCompleted, int? progressPercentage = null)
+        {
+            AddAuthHeader();
+            var dto = new { isCompleted, progressPercentage };
+            var response = await _client.PostAsJsonAsync($"api/lesson-progress/update/{contentId}", dto);
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<LessonProgressWrapper>(_jsonOptions);
+                return result?.Data;
+            }
+            return null;
+        }
+
+        public async Task<CourseProgressViewModel?> GetCourseProgressAsync(int courseId)
+        {
+            AddAuthHeader();
+            var response = await _client.GetAsync($"api/lesson-progress/course/{courseId}");
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<CourseProgressWrapper>(_jsonOptions);
+                return result?.Data;
+            }
+            return null;
+        }
+
+        public async Task<List<LessonProgressViewModel>> GetLessonProgressesAsync(int courseId)
+        {
+            AddAuthHeader();
+            var response = await _client.GetAsync($"api/lesson-progress/course/{courseId}/lessons");
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<LessonProgressesWrapper>(_jsonOptions);
+                return result?.Data ?? new List<LessonProgressViewModel>();
+            }
+            return new List<LessonProgressViewModel>();
+        }
+
         // Wrapper helper classes
         private class CoursesWrapper
         {
@@ -242,6 +328,21 @@ namespace CourseManagementMVC.Services
         private class UsersWrapper
         {
             public List<UserViewModel> Users { get; set; } = new();
+        }
+
+        private class LessonProgressWrapper
+        {
+            public LessonProgressViewModel Data { get; set; } = null!;
+        }
+
+        private class CourseProgressWrapper
+        {
+            public CourseProgressViewModel Data { get; set; } = null!;
+        }
+
+        private class LessonProgressesWrapper
+        {
+            public List<LessonProgressViewModel> Data { get; set; } = new();
         }
     }
 }

@@ -81,6 +81,7 @@ builder.Services.AddScoped<SeedDataService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<ICourseContentService, CourseContentService>();
 builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
+builder.Services.AddScoped<ILessonProgressService, LessonProgressService>();
 
 // HTTP Client for OAuth
 builder.Services.AddHttpClient();

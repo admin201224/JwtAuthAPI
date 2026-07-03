@@ -15,9 +15,27 @@ namespace CourseManagementMVC.Controllers
         }
 
         // GET: Courses
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? search, string? mode, string? level, decimal? minPrice, decimal? maxPrice)
         {
-            var courses = await _apiService.GetCoursesAsync();
+            List<CourseViewModel> courses;
+
+            if (!string.IsNullOrWhiteSpace(search) || !string.IsNullOrWhiteSpace(mode) || 
+                !string.IsNullOrWhiteSpace(level) || minPrice.HasValue || maxPrice.HasValue)
+            {
+                courses = await _apiService.SearchCoursesAsync(search, mode, level, minPrice, maxPrice);
+            }
+            else
+            {
+                courses = await _apiService.GetCoursesAsync();
+            }
+
+            // Lưu filter để hiển thị lại trên view
+            ViewBag.SearchKeyword = search;
+            ViewBag.SelectedMode = mode;
+            ViewBag.SelectedLevel = level;
+            ViewBag.MinPrice = minPrice;
+            ViewBag.MaxPrice = maxPrice;
+
             return View(courses);
         }
 

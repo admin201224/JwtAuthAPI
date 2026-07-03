@@ -70,11 +70,67 @@ namespace CourseManagementMVC.Controllers
             }
 
             var contents = await _apiService.GetCourseContentsAsync(id);
-            
+
             ViewBag.Course = course;
             ViewBag.Enrollment = enrollment;
 
             return View(contents.OrderBy(c => c.OrderIndex).ToList());
+        }
+
+        // GET: MyCourses/GetCourseProgress/5
+        public async Task<IActionResult> GetCourseProgress(int id)
+        {
+            try
+            {
+                var progress = await _apiService.GetCourseProgressAsync(id);
+                if (progress == null)
+                {
+                    return Ok(new { success = false, message = "Không tìm thấy tiến độ" });
+                }
+                return Ok(new { success = true, data = progress });
+            }
+            catch (Exception ex)
+            {
+                return Ok(new { success = false, message = ex.Message });
+            }
+        }
+
+        // GET: MyCourses/GetLessonProgress/5/1
+        public async Task<IActionResult> GetLessonProgress(int contentId, int courseId)
+        {
+            try
+            {
+                var progress = await _apiService.GetOrCreateLessonProgressAsync(contentId, courseId);
+                if (progress == null)
+                {
+                    return Ok(new { success = false, message = "Không tìm thấy tiến độ" });
+                }
+                return Ok(new { success = true, data = progress });
+            }
+            catch (Exception ex)
+            {
+                return Ok(new { success = false, message = ex.Message });
+            }
+        }
+
+        // POST: MyCourses/UpdateLessonProgress
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateLessonProgress(int contentId, bool isCompleted)
+        {
+            try
+            {
+                var progress = await _apiService.UpdateLessonProgressAsync(contentId, isCompleted);
+                if (progress == null)
+                {
+                    return Ok(new { success = false, message = "Không thể cập nhật tiến độ" });
+                }
+                return Ok(new { success = true, data = progress });
+            }
+            catch (Exception ex)
+            {
+                return Ok(new { success = false, message = ex.Message });
+            }
         }
     }
 }

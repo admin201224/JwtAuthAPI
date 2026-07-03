@@ -14,6 +14,7 @@ namespace JwtAuthAPI.Data
         public DbSet<CourseContent> CourseContents { get; set; }
         public DbSet<CourseEnrollment> CourseEnrollments { get; set; }
         public DbSet<Enrollment> Enrollments { get; set; }
+        public DbSet<LessonProgress> LessonProgresses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -90,6 +91,31 @@ namespace JwtAuthAPI.Data
                 entity.HasOne(e => e.Course)
                       .WithMany()
                       .HasForeignKey(e => e.CourseId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // ── LessonProgress ────────────────────────────────────────────
+            modelBuilder.Entity<LessonProgress>(entity =>
+            {
+                // Unique: mỗi học viên chỉ có một tiến độ cho từng bài
+                entity.HasIndex(lp => new { lp.UserId, lp.ContentId }).IsUnique();
+
+                // LessonProgress → User (Cascade)
+                entity.HasOne(lp => lp.User)
+                      .WithMany()
+                      .HasForeignKey(lp => lp.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // LessonProgress → CourseContent (Cascade)
+                entity.HasOne(lp => lp.Content)
+                      .WithMany()
+                      .HasForeignKey(lp => lp.ContentId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // LessonProgress → Course (Cascade)
+                entity.HasOne(lp => lp.Course)
+                      .WithMany()
+                      .HasForeignKey(lp => lp.CourseId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
 

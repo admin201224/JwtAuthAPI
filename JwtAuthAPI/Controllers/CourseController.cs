@@ -29,21 +29,51 @@ namespace JwtAuthAPI.Controllers
         // ── GET /api/course ───────────────────────────────────────────────
         /// <summary>
         /// Lấy danh sách khóa học (Public).
-        /// Filter: mode (Online/Offline/Hybrid/SelfPaced), status (Draft/Published/Archived), level (Beginner/Intermediate/Advanced)
+        /// Filter: keyword (tìm kiếm), mode (Online/Offline/Hybrid/SelfPaced), status (Draft/Published/Archived), 
+        /// level (Beginner/Intermediate/Advanced), minPrice, maxPrice
         /// </summary>
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> GetAll(
+            [FromQuery] string? keyword = null,
             [FromQuery] LearningMode? mode = null,
             [FromQuery] CourseStatus? status = null,
-            [FromQuery] CourseLevel? level = null)
+            [FromQuery] CourseLevel? level = null,
+            [FromQuery] decimal? minPrice = null,
+            [FromQuery] decimal? maxPrice = null)
         {
             var courses = await _courseService.GetAllAsync(mode, status, level);
+
+            // Tìm kiếm theo keyword
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                keyword = keyword.ToLower();
+                courses = courses.Where(c =>
+                    c.Title.ToLower().Contains(keyword) ||
+                    c.Description.ToLower().Contains(keyword)
+                ).ToList();
+            }
+
+            // Lọc theo giá
+            if (minPrice.HasValue)
+                courses = courses.Where(c => c.Price >= minPrice.Value).ToList();
+
+            if (maxPrice.HasValue)
+                courses = courses.Where(c => c.Price <= maxPrice.Value).ToList();
+
             return Ok(new
             {
                 message = "Lấy danh sách khóa học thành công",
-                count   = courses.Count,
-                filters = new { mode = mode?.ToString(), status = status?.ToString(), level = level?.ToString() },
+                count = courses.Count,
+                filters = new
+                {
+                    keyword = keyword,
+                    mode = mode?.ToString(),
+                    status = status?.ToString(),
+                    level = level?.ToString(),
+                    minPrice,
+                    maxPrice
+                },
                 courses
             });
         }

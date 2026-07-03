@@ -161,4 +161,25 @@ namespace CourseManagementMVC.Models
         [Display(Name = "Ngày tạo")]
         public DateTime? CreatedAt { get; set; }
     }
+
+    public class LessonProgressViewModel
+    {
+        public int Id { get; set; }
+        public int UserId { get; set; }
+        public int ContentId { get; set; }
+        public int CourseId { get; set; }
+        public bool IsCompleted { get; set; }
+        public DateTime? StartedAt { get; set; }
+        public DateTime? CompletedAt { get; set; }
+        public int ProgressPercentage { get; set; }
+    }
+
+    public class CourseProgressViewModel
+    {
+        public int CourseId { get; set; }
+        public int TotalLessons { get; set; }
+        public int CompletedLessons { get; set; }
+        public int ProgressPercentage { get; set; }
+        public List<LessonProgressViewModel> LessonProgresses { get; set; } = new();
+    }
 }

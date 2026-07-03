@@ -2,11 +2,7 @@
 @{
 
     ViewData["Title"] = "Danh sách khóa học";
-    // Biến kiểm tra quyền để code bên dưới gọn gàng hơn
     bool isAdminOrInstructor = User.Identity?.IsAuthenticated == true && (User.IsInRole("Admin") || User.IsInRole("Instructor"));
-
-    //Model là new { id = 1, ten = "Nam" };
-
     var courses = Model;
 }
 
@@ -32,13 +28,126 @@
     }
 </div>
 
+<!-- Search & Filter Section -->
+@if (!isAdminOrInstructor)
+{
+    <div class="card-premium p-4 mb-5">
+        <h5 class="text-white font-weight-bold mb-4">
+            <i class="fa-solid fa-filter me-2"></i> Tìm kiếm & Lọc khóa học
+        </h5>
+
+        <form asp-action="Index" method="get" id="filterForm">
+            <div class="row g-3">
+                <!-- Search Input -->
+                <div class="col-md-12">
+                    <label for="search" class="form-label text-secondary small">
+                        <i class="fa-solid fa-magnifying-glass me-1"></i> Tìm kiếm khóa học
+                    </label>
+                    <input type="text" class="form-control form-glass" id="search" name="search" 
+                           placeholder="Nhập tên hoặc từ khóa..." value="@ViewBag.SearchKeyword"
+                           style="border-color: rgba(255,255,255,0.1);">
+                </div>
+
+                <!-- Filter Row -->
+                <div class="col-md-6">
+                    <label for="mode" class="form-label text-secondary small">
+                        <i class="fa-solid fa-laptop me-1"></i> Hình thức học
+                    </label>
+                    <select class="form-select form-glass" id="mode" name="mode" 
+                            style="border-color: rgba(255,255,255,0.1);">
+                        <option value="">-- Tất cả hình thức --</option>
+                        <option value="Online">Online</option>
+                        <option value="Offline">Offline</option>
+                        <option value="Hybrid">Hybrid</option>
+                        <option value="SelfPaced">Self-Paced</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="level" class="form-label text-secondary small">
+                        <i class="fa-solid fa-layer-group me-1"></i> Cấp độ
+                    </label>
+                    <select class="form-select form-glass" id="level" name="level"
+                            style="border-color: rgba(255,255,255,0.1);">
+                        <option value="">-- Tất cả cấp độ --</option>
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="minPrice" class="form-label text-secondary small">
+                        <i class="fa-solid fa-tag me-1"></i> Giá tối thiểu (VND)
+                    </label>
+                    <input type="number" class="form-control form-glass" id="minPrice" name="minPrice" 
+                           placeholder="0" value="@ViewBag.MinPrice"
+                           style="border-color: rgba(255,255,255,0.1);">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="maxPrice" class="form-label text-secondary small">
+                        <i class="fa-solid fa-tag me-1"></i> Giá tối đa (VND)
+                    </label>
+                    <input type="number" class="form-control form-glass" id="maxPrice" name="maxPrice" 
+                           placeholder="999,999,999" value="@ViewBag.MaxPrice"
+                           style="border-color: rgba(255,255,255,0.1);">
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="col-12">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-premium">
+                            <i class="fa-solid fa-search me-1"></i> Tìm kiếm
+                        </button>
+                        <a href="@Url.Action("Index", "Courses")" class="btn btn-dark-glass">
+                            <i class="fa-solid fa-rotate-right me-1"></i> Đặt lại
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Set selected values from ViewBag
+            @if (!string.IsNullOrWhiteSpace(ViewBag.SelectedMode?.ToString()))
+            {
+                <text>$('#mode').val('@ViewBag.SelectedMode');</text>
+            }
+            @if (!string.IsNullOrWhiteSpace(ViewBag.SelectedLevel?.ToString()))
+            {
+                <text>$('#level').val('@ViewBag.SelectedLevel');</text>
+            }
+        });
+    </script>
+}
+
+
+    @if (courses.Any())
+    {
+        <div class="alert alert-info alert-dismissible fade show" style="background: rgba(13,202,240,0.15); border: 1px solid rgba(13,202,240,0.3);">
+            <div class="text-light small">
+                <i class="fa-solid fa-circle-info me-2"></i>
+                Tìm thấy <strong>@courses.Count()</strong> khóa học
+                @if (!string.IsNullOrWhiteSpace(ViewBag.SearchKeyword))
+                {
+                    <text> khớp với từ khóa <strong>"@ViewBag.SearchKeyword"</strong></text>
+                }
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+}
+
 @if (!Model.Any())
 {
     <div class="card-premium p-5 text-center">
         <i class="fa-solid @(isAdminOrInstructor ? "fa-folder-open" : "fa-box-open") fa-3x text-secondary mb-3"></i>
         <h3 class="text-white">Chưa có khóa học nào</h3>
         <p class="text-secondary mb-0">
-            @(isAdminOrInstructor ? "Hệ thống hiện tại chưa có dữ liệu. Hãy thêm khóa học đầu tiên!" : "Các khóa học mới sẽ sớm được cập nhật. Vui lòng quay lại sau!")
+            @(isAdminOrInstructor ? "Hệ thống hiện tại chưa có dữ liệu. Hãy thêm khóa học đầu tiên!" : "Không tìm thấy khóa học khớp với tiêu chí tìm kiếm. Vui lòng thử lại!")
         </p>
     </div>
 }
