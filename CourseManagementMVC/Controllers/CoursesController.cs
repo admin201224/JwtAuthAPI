@@ -326,5 +326,17 @@ namespace CourseManagementMVC.Controllers
             }
             return RedirectToAction(nameof(ManageContents), new { id = courseId });
         }
+
+        // GET: Courses/CourseRoster/5
+        [Authorize(Roles = "Admin,Instructor")]
+        public async Task<IActionResult> CourseRoster(int id)
+        {
+            var course = await _apiService.GetCourseByIdAsync(id);
+            if (course == null) return NotFound();
+
+            var roster = await _apiService.GetCourseRosterAsync(id);
+            ViewBag.Course = course;
+            return View(roster);
+        }
     }
 }

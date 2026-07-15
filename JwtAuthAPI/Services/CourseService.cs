@@ -49,6 +49,7 @@ namespace JwtAuthAPI.Services
                 CourseStatus.Archived  => "Lưu trữ",
                 _                      => c.Status.ToString()
             },
+            EnrollmentCount = c.Enrollments?.Count ?? 0,
             CreatedAt = c.CreatedAt,
             UpdatedAt = c.UpdatedAt,
             CreatedByUserId = c.CreatedByUserId,
@@ -65,6 +66,7 @@ namespace JwtAuthAPI.Services
             {
                 var query = _db.Courses
                            .Include(c => c.CreatedBy)
+                           .Include(c => c.Enrollments)
                            .AsNoTracking()
                            .AsQueryable();
 
@@ -96,6 +98,7 @@ namespace JwtAuthAPI.Services
         {
             var course = await _db.Courses
                                   .Include(c => c.CreatedBy)
+                                  .Include(c => c.Enrollments)
                                   .AsNoTracking()
                                   .FirstOrDefaultAsync(c => c.Id == id);
 

@@ -246,6 +246,32 @@ namespace CourseManagementMVC.Services
             }
             return new List<UserViewModel>();
         }
+        public async Task<UserViewModel?> GetUserByIdAsync(int id)
+        {
+            AddAuthHeader();
+            var response = await _client.GetAsync($"api/user/{id}");
+            if (response.IsSuccessStatusCode)
+            {
+                var wrapper = await response.Content.ReadFromJsonAsync<UserWrapper>(_jsonOptions);
+                return wrapper?.User;
+            }
+            return null;
+        }
+
+        public async Task<bool> CreateUserAsync(CreateUserViewModel model)
+        {
+            AddAuthHeader();
+            var response = await _client.PostAsJsonAsync("api/user", model);
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> UpdateUserAsync(int id, EditUserViewModel model)
+        {
+            AddAuthHeader();
+            var dto = new { Username = model.Username, Password = model.Password, Role = model.Role };
+            var response = await _client.PutAsJsonAsync($"api/user/{id}", dto);
+            return response.IsSuccessStatusCode;
+        }
 
         public async Task<bool> DeleteUserAsync(int id)
         {
@@ -328,6 +354,11 @@ namespace CourseManagementMVC.Services
         private class UsersWrapper
         {
             public List<UserViewModel> Users { get; set; } = new();
+        }
+
+        private class UserWrapper
+        {
+            public UserViewModel User { get; set; } = null!;
         }
 
         private class LessonProgressWrapper

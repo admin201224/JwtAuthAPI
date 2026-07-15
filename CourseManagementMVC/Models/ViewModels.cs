@@ -80,6 +80,9 @@ namespace CourseManagementMVC.Models
         [Display(Name = "Trạng thái")]
         public string Status { get; set; } = "Draft";
 
+        [Display(Name = "Số học viên")]
+        public int EnrollmentCount { get; set; }
+
         [Display(Name = "Ngày tạo")]
         public DateTime? CreatedAt { get; set; }
 
@@ -162,6 +165,14 @@ namespace CourseManagementMVC.Models
         public DateTime? CreatedAt { get; set; }
     }
 
+    public class DashboardViewModel
+    {
+        public int TotalCourses { get; set; }
+        public int TotalUsers { get; set; }
+        public int TotalEnrollments { get; set; } // Can be dummy or calculated if possible
+        public List<CourseViewModel> RecentCourses { get; set; } = new();
+    }
+
     public class LessonProgressViewModel
     {
         public int Id { get; set; }
@@ -181,5 +192,36 @@ namespace CourseManagementMVC.Models
         public int CompletedLessons { get; set; }
         public int ProgressPercentage { get; set; }
         public List<LessonProgressViewModel> LessonProgresses { get; set; } = new();
+    }
+
+    public class CreateUserViewModel
+    {
+        [Required(ErrorMessage = "Tên đăng nhập là bắt buộc")]
+        [Display(Name = "Tên đăng nhập")]
+        public string Username { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Mật khẩu là bắt buộc")]
+        [Display(Name = "Mật khẩu")]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = string.Empty;
+
+        [Display(Name = "Vai trò")]
+        public string Role { get; set; } = "Student";
+    }
+
+    public class EditUserViewModel
+    {
+        public int Id { get; set; }
+
+        [Required(ErrorMessage = "Tên đăng nhập là bắt buộc")]
+        [Display(Name = "Tên đăng nhập")]
+        public string Username { get; set; } = string.Empty;
+
+        [Display(Name = "Mật khẩu (để trống nếu không đổi)")]
+        [DataType(DataType.Password)]
+        public string? Password { get; set; }
+
+        [Display(Name = "Vai trò")]
+        public string Role { get; set; } = "Student";
     }
 }

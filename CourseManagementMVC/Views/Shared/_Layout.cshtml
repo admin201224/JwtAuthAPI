@@ -39,8 +39,21 @@
                             @if (User.IsInRole("Admin") || User.IsInRole("Instructor"))
                             {
                                 <li class="nav-item">
+                                    <a class="nav-link text-light px-3" asp-controller="Dashboard" asp-action="Index">
+                                        <i class="fa-solid fa-chart-pie me-1"></i> Dashboard
+                                    </a>
+                                </li>
+                                <li class="nav-item">
                                     <a class="nav-link text-light px-3" asp-controller="Courses" asp-action="Create">
                                         <i class="fa-solid fa-plus-circle me-1"></i> Tạo khóa học
+                                    </a>
+                                </li>
+                            }
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-light px-3" asp-controller="Admin" asp-action="Users">
+                                        <i class="fa-solid fa-users-gear me-1"></i> Quản lý User
                                     </a>
                                 </li>
                             }

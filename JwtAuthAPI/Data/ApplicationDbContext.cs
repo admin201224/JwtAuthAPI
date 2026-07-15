@@ -112,11 +112,11 @@ namespace JwtAuthAPI.Data
                       .HasForeignKey(lp => lp.ContentId)
                       .OnDelete(DeleteBehavior.Cascade);
 
-                // LessonProgress → Course (Cascade)
+                // LessonProgress → Course (NoAction)
                 entity.HasOne(lp => lp.Course)
                       .WithMany()
                       .HasForeignKey(lp => lp.CourseId)
-                      .OnDelete(DeleteBehavior.Cascade);
+                      .OnDelete(DeleteBehavior.NoAction);
             });
 
             base.OnModelCreating(modelBuilder);

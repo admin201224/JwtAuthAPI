@@ -1,0 +1,80 @@
+@model IEnumerable<CourseManagementMVC.Models.EnrollmentViewModel>
+@{
+    var course = ViewBag.Course as CourseManagementMVC.Models.CourseViewModel;
+    ViewData["Title"] = $"Danh sách học viên - {course?.Title}";
+}
+
+<div class="card-premium p-5">
+    <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3 border-secondary" style="border-color: rgba(255, 255, 255, 0.08) !important;">
+        <div>
+            <h2 class="text-white font-weight-bold mb-1">Danh sách học viên</h2>
+            <p class="text-secondary mb-0">Khóa học: <strong class="text-white">@course?.Title</strong></p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Index" class="btn btn-dark-glass btn-sm">
+                <i class="fa-solid fa-arrow-left me-1"></i> Quay lại
+            </a>
+            <a asp-action="Details" asp-route-id="@course?.Id" class="btn btn-premium btn-sm">
+                <i class="fa-solid fa-eye me-1"></i> Xem trang chi tiết
+            </a>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="fa-solid fa-users-slash fa-3x text-secondary mb-3"></i>
+            <h4 class="text-white">Chưa có học viên nào</h4>
+            <p class="text-secondary mb-0">Hiện tại chưa có học viên nào đăng ký khóa học này.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle border-secondary" style="background: transparent;">
+                <thead>
+                    <tr class="text-secondary small text-uppercase" style="border-bottom-color: rgba(255, 255, 255, 0.08) !important;">
+                        <th>Học viên</th>
+                        <th>Ngày đăng ký</th>
+                        <th>Trạng thái học</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr style="border-bottom-color: rgba(255, 255, 255, 0.05) !important;">
+                            <td class="text-white font-weight-semibold">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle bg-secondary d-flex justify-content-center align-items-center" style="width: 32px; height: 32px;">
+                                        <i class="fa-solid fa-user text-white small"></i>
+                                    </div>
+                                    @item.Username
+                                </div>
+                            </td>
+                            <td class="text-secondary small">
+                                @(item.EnrolledAt?.ToString("dd/MM/yyyy HH:mm"))
+                            </td>
+                            <td>
+                                @{
+                                    var statusClass = item.Status switch
+                                    {
+                                        "Completed" => "status-completed",
+                                        "InProgress" => "status-inprogress",
+                                        _ => "status-notstarted"
+                                    };
+                                    var statusDisplay = item.Status switch
+                                    {
+                                        "Completed" => "Đã hoàn thành",
+                                        "InProgress" => "Đang học",
+                                        _ => "Chưa bắt đầu"
+                                    };
+                                }
+                                <span class="badge @statusClass">@statusDisplay</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

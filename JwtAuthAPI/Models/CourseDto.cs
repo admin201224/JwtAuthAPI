@@ -79,6 +79,7 @@ namespace JwtAuthAPI.Models
         public string LevelDisplay { get; set; } = null!;
         public string Status { get; set; } = null!;
         public string StatusDisplay { get; set; } = null!;
+        public int EnrollmentCount { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public int CreatedByUserId { get; set; }

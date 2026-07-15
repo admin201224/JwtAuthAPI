@@ -163,6 +163,8 @@ else
                             <th scope="col" class="py-3 px-4 text-secondary font-weight-bold">Khóa học</th>
                             <th scope="col" class="py-3 px-3 text-secondary font-weight-bold">Hình thức</th>
                             <th scope="col" class="py-3 px-3 text-secondary font-weight-bold">Cấp độ</th>
+                            <th scope="col" class="py-3 px-3 text-secondary font-weight-bold">Trạng thái</th>
+                            <th scope="col" class="py-3 px-3 text-secondary font-weight-bold">Số học viên</th>
                             <th scope="col" class="py-3 px-3 text-secondary font-weight-bold">Học phí</th>
                             <th scope="col" class="py-3 px-4 text-secondary font-weight-bold text-end">Hành động</th>
                         </tr>
@@ -200,6 +202,16 @@ else
                                 <td class="py-3 px-3">
                                     <span class="text-purple small font-weight-bold text-uppercase" style="letter-spacing: 0.5px; color: #a855f7;">@course.Level</span>
                                 </td>
+                                <td class="py-3 px-3">
+                                    @{
+                                        var statusClass = course.Status switch { "Published" => "bg-success", "Draft" => "bg-secondary", "Archived" => "bg-warning", _ => "bg-primary" };
+                                    }
+                                    <span class="badge @statusClass">@course.Status</span>
+                                </td>
+                                <td class="py-3 px-3 text-center">
+                                    <span class="text-white font-weight-bold">@course.EnrollmentCount</span>
+                                    <i class="fa-solid fa-user-graduate text-secondary ms-1 small"></i>
+                                </td>
                                 <td class="py-3 px-3 text-white font-weight-bold small">
                                     @(course.Price == 0 ? "Miễn phí" : string.Format("{0:N0} đ", course.Price))
                                 </td>
@@ -207,6 +219,7 @@ else
                                     <div class="d-flex justify-content-end gap-2">
                                         <a asp-action="Edit" asp-route-id="@course.Id" class="btn btn-sm btn-dark-glass" title="Sửa thông tin"><i class="fa-solid fa-edit"></i></a>
                                         <a asp-action="ManageContents" asp-route-id="@course.Id" class="btn btn-sm btn-dark-glass" title="Quản lý bài học"><i class="fa-solid fa-list-check"></i></a>
+                                        <a asp-action="CourseRoster" asp-route-id="@course.Id" class="btn btn-sm btn-dark-glass" title="Danh sách học viên"><i class="fa-solid fa-users"></i></a>
                                         <form asp-action="Delete" asp-route-id="@course.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn chắc chắn muốn xóa?');">
                                             @Html.AntiForgeryToken()
                                             <button type="submit" class="btn btn-sm btn-danger text-white" title="Xóa"><i class="fa-solid fa-trash"></i></button>

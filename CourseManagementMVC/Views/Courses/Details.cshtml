@@ -37,7 +37,18 @@
 
                 @if (User.Identity?.IsAuthenticated == true)
                 {
-                    if (Model.IsEnrolled)
+                    if (User.IsInRole("Admin") || User.IsInRole("Instructor"))
+                    {
+                        <div class="d-flex flex-column gap-2">
+                            <a asp-action="CourseRoster" asp-route-id="@Model.Course.Id" class="btn btn-premium w-100 py-3">
+                                <i class="fa-solid fa-users me-1"></i> Danh sách học viên
+                            </a>
+                            <a asp-action="ManageContents" asp-route-id="@Model.Course.Id" class="btn btn-dark-glass w-100 py-2">
+                                <i class="fa-solid fa-list-check me-1"></i> Quản lý nội dung
+                            </a>
+                        </div>
+                    }
+                    else if (Model.IsEnrolled)
                     {
                         <div class="d-flex flex-column gap-2">
                             <a asp-controller="MyCourses" asp-action="Study" asp-route-id="@Model.Course.Id" class="btn btn-premium w-100 py-3">
