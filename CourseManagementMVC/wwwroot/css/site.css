@@ -204,6 +204,12 @@ header {
 }
 
 /* Footer */
+.footer[b-wcnt6sv01i] {
+    position: static; /* or just remove this line */
+    width: 100%;
+    white-space: nowrap;
+    line-height: 60px;
+}
 
 
 /* Custom Scrollbar */
